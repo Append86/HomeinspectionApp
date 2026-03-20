@@ -1,0 +1,103 @@
+Category,Sub_Category
+Structural system and foundation,Foundation
+Structural system and foundation,Basement
+Structural system and foundation,Crawlspace
+Structural system and foundation,Structural Components
+Structural system and foundation,"Floor, Wall, Ceiling"
+Structural system and foundation,Framing
+Structural system and foundation,Attic
+Structural system and foundation,Roof
+Structural system and foundation,Describe the foundation and its construction type:
+Structural system and foundation,"Methods used to inspect the under-floor crawl space or basement area, attic, floor, wall, ceiling, framing, and roof:"
+Structural system and foundation,Visible signs of water and moisture penetration into the building or signs of condensation on building components:
+Structural system and foundation,Any infestation that significantly impacts the structure or integrity of the home
+Exterior,Exterior wall covering
+Exterior,Exposed foundation
+Exterior,Flashing and trim
+Exterior,Exterior doors
+Exterior,Exterior windows
+Exterior,Exterior wall covering
+Exterior,Attached decks
+Exterior,"Balconies, stoops, steps, porches, landings and railing"
+Exterior,"Eaves, Soffits, and Fascia"
+Exterior,"Vegetation, grading, surface drainage, and retaining walls"
+Exterior,"Walkways, patios, and driveways"
+Roof,Roof covering
+Roof,Describe the roof covering
+Roof,methods used to inspect the roof
+Roof,Roof drainage systems
+Roof,"Flashings, skylights, chimneys, and roof penetrations"
+Plumbing System,"Interior water supply, fixtures, faucets, piping, drains, waste, and vent systems"
+Plumbing System,Absence of backflow prevention/cross-connection controls
+Plumbing System,Water heating equipment
+Plumbing System,Fuel storage and distribution systems
+Plumbing System,"Drainage sumps, sump pump and related piping"
+Plumbing System,Water heating equipment.
+Plumbing System,Type of water heating equipment
+Plumbing System,Capacity of Water heating equipment
+Plumbing System,Fuel storage and distribution systems.
+Plumbing System,"Drainage sumps, sump pump and related piping."
+Plumbing System,location of main water and main shut-off valves
+Plumbing System,Location of the main fuel shut-off
+Plumbing System,Water service entry
+Plumbing System,Water distribution piping materials
+Electrical System,Service Drop
+Electrical System,Overhead Service Conductors and Attachment Point
+Electrical System,"Service Head, Gooseneck and Drip Loops"
+Electrical System,"Service Mast, Service Conduit and Raceway"
+Electrical System,Electric Meter and Base
+Electrical System,Service Entrance Cable
+Electrical System,Main Service Disconnect
+Electrical System,Panelboards and Interior components of service panels and subpanels; conductors; overcurrent protection devices
+Electrical System,Service Grounding and Bonding
+Electrical System,"Switches, Lighting Fixtures and Receptacles"
+Electrical System,Ground-Fault and Arc-Fault Circuit Interrupter Receptacles and Circuit Breakers
+Electrical System,Presence of Smoke and Carbon-Monoxide Detectors
+Electrical System,Condition of the Main Bond Jumpers
+Electrical System,Absence of GFCI/AFCI Where required
+Electrical System,Describe the amperage and voltage rating of the service
+Electrical System,Location of main disconnects and subpanels
+Electrical System,Wiring methods.
+Electrical System,Presence of solid conductor aluminum branch circuit wiring
+Electrical System,Any non-compliance with the Carbon Monoxide Alarm Detector Act [430 ILCS 135] and the Smoke Detector Act [425 ILCS 60].
+Heating System,Installed heating equipment
+Heating System,"Visible vent systems, flues, and chimneys"
+Heating System,Location of the Thermostat for the Heating System
+Heating System,Fuel Storage and Distribution
+Heating System,Describe Heating equipment
+Heating System,Describe the energy source
+Heating System,Describe Heating method
+Heating System,Observe any heating system that did not operate?
+Heating System,Observe that the heating system was inaccessible?
+Heating System,Observe absence of a heat source in a habitable room?
+Cooling System,Installed central and through-wall cooling equipment
+Cooling System,Describe the energy source
+Cooling System,Describe the Cooling method
+Cooling System,Location of the Thermostat for the Cooling System
+Cooling System,Observe any cooling system that did not operate?
+Cooling System,Observe that the cooling system was inaccessible?
+Cooling System,"Distribution Systems (Ducts, registers, pumps)"
+Interior,Doors and Windows
+Interior,"Floors, Walls and Ceilings"
+Interior,"Stairs, Steps, Landings, Stairways and Ramps, balconies"
+Interior,"Railings, Guards and Handrails"
+Interior,"Countertops, installed cabinets"
+Interior,Household appliances included with the property
+Interior,Visible signs of water and moisture penetration into the building or signs of condensation on building components
+Interior,Observe any window that was obviously fogged or displayed other evidence of broken seals?
+Interior,"Observe improper spacing between balusters, spindles and rails for steps, stairways, guards or railings?"
+"Attic, Insulation and Ventilation",Insulation and vapor retarders in unfinished spaces
+"Attic, Insulation and Ventilation",Ventilation of attics and foundation areas
+"Attic, Insulation and Ventilation","Mechanical ventilation systems in attics, kitchens, bathrooms, and laundry"
+"Attic, Insulation and Ventilation","Absence of insulation in unfinished spaces at conditioned surfaces.
+"
+"Attic, Insulation and Ventilation",Describe the insulation and vapor retarders in unfinished spaces
+"Attic, Insulation and Ventilation",Method of Attic Inspection
+Fireplaces,Inspect the system components
+Fireplaces,"Vent systems, flues, and chimneys"
+Fireplaces,"Describe the fireplaces, solid fuel burning appliances, and chimneys"
+Fireplaces,Any significant damage or deterioration that is visible.
+Fireplaces,Absence of a Flue Liner
+Garage,Garage Vehicle Doors
+Garage,Garage Vehicle Door Manually-operated or Installed with a garage door opener
+Garage,Observe photo-electric safety sensors that did not operate properly?
