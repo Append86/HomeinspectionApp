@@ -26,3 +26,14 @@ export const updateItem = async (itemId, data) => {
     throw error;
   }
 };
+
+// Add this to your existing api.js
+export const updateInspection = async (id, data) => {
+  try {
+    const response = await axios.patch(`${API_URL}inspections/${id}/`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating inspection info:", error);
+    throw error;
+  }
+};
