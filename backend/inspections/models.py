@@ -1,6 +1,29 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    company_name = models.CharField(max_length=200, blank=True)
+    company_logo = models.ImageField(upload_to='logos/', blank=True, null=True)
+    company_address = models.CharField(max_length=500, blank=True)
+    inspector_license_number = models.CharField(max_length=100, blank=True)
+    license_expiration_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"
+    
+# Automatically create a profile when a user is created
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    
 class Inspection(models.Model):
+
+    # Link every inspection to a specific user
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='inspections', default=1)
     # (Keep your existing Property & Client Info fields here)
     property_address = models.CharField(max_length=500)
     client_name = models.CharField(max_length=200)

@@ -1,5 +1,10 @@
 django
 djangorestframework
+djangorestframework-simplejwt
 django-cors-headers
 Pillow
-djangorestframework
+dj-database-url
+psycopg2-binary
+xhtml2pdf
+boto3
+django-storages
