@@ -80,3 +80,4 @@ class Photo(models.Model):
     # NEW FIELD:
     caption = models.CharField(max_length=255, blank=True, null=True) 
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
