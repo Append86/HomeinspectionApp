@@ -1,7 +1,24 @@
-node_modules/
+# --- Python / Backend ---
+venv/
+.venv/
+env/
 __pycache__/
 *.pyc
-db.sqlite3
-.env
+.python-version
+
+# --- JavaScript / React / Mobile ---
+node_modules/
 dist/
+build/
+.eslintcache
+*.log
+
+# --- Environment & Secrets (CRITICAL) ---
+.env
+.env.local
+.env.*.local
+
+# --- OS / IDE Specific ---
 .DS_Store
+.vscode/
+.idea/
