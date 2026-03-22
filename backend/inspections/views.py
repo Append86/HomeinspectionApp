@@ -3,6 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Inspection, InspectionItem
 from .serializers import InspectionSerializer, InspectionItemSerializer
+from .utils import render_to_pdf
+from django.http import HttpResponse
 
 class InspectionViewSet(viewsets.ModelViewSet):
     serializer_class = InspectionSerializer
@@ -45,6 +47,28 @@ class InspectionViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(new_inspection)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['get'])
+    def download_report(self, request, pk=None):
+        inspection = self.get_object()
+        user_profile = request.user.profile # Get inspector's logo and license
+        
+        context = {
+            'inspection': inspection,
+            'profile': user_profile,
+            'items': inspection.items.all().order_by('category'),
+        }
+        
+        pdf = render_to_pdf('report_template.html', context)
+        
+        if pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            filename = f"Report_{inspection.property_address.replace(' ', '_')}.pdf"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        return Response({"error": "Failed to generate PDF"}, status=400)
+    
+
 
 class InspectionItemViewSet(viewsets.ModelViewSet):
     serializer_class = InspectionItemSerializer

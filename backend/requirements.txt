@@ -5,6 +5,6 @@ django-cors-headers
 Pillow
 dj-database-url
 psycopg2-binary
-xhtml2pdf
+weasyprint
 boto3
 django-storages

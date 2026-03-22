@@ -1,0 +1,16 @@
+<div style="display: flex; justify-content: space-between;">
+    <h1 style="color: orange;">INSPECTION REPORT</h1>
+    <p>Address: {{ inspection.property_address }}</p>
+</div>
+
+{% for item in items %}
+    <div class="finding">
+        <h3>{{ item.sub_category }}</h3>
+        <p>{{ item.note }}</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+            {% for photo in item.photos.all %}
+                <img src="{{ photo.image.url }}" style="width: 100%; padding: 5px;">
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
