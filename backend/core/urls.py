@@ -17,19 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from inspections.views import InspectionViewSet
+from inspections.views import InspectionViewSet, InspectionItemViewSet 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
 router = DefaultRouter()
-router.register('inspections', InspectionViewSet)
+
+# Add 'basename' to these two lines:
+router.register('inspections', InspectionViewSet, basename='inspections')
+router.register('items', InspectionItemViewSet, basename='items') 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    # Auth Endpoints
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
