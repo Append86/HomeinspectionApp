@@ -13,10 +13,37 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# JWT Settings
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+
+# 2. DigitalOcean Spaces (S3 compatible) Settings
+# These should be in your .env file eventually
+AWS_ACCESS_KEY_ID = os.getenv('SPACES_ACCESS_KEY')
+AWS_SECRET_ACCESS_KEY = os.getenv('SPACES_SECRET_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('SPACES_BUCKET_NAME')
+AWS_S3_ENDPOINT_URL = os.getenv('SPACES_ENDPOINT_URL') # e.g. https://nyc3.digitaloceanspaces.com
+AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+AWS_LOCATION = 'media'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/

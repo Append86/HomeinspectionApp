@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getTemplate, updateItem, updateInspection } from './api'; // Added updateInspection
 import { ChevronLeft, Camera, CheckCircle, Home as HomeIcon } from 'lucide-react';
+import Login from './Login';
 
 const CATEGORY_ICONS = {
   "General Info": "📋", 
@@ -22,6 +23,9 @@ const STATUS_OPTIONS = [
 ];
 
 function App() {
+
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access'));
+
   const [template, setTemplate] = useState(null);
   const [view, setView] = useState('grid');
   const [activeCategory, setActiveCategory] = useState(null);
@@ -33,7 +37,19 @@ function App() {
   const [answer, setAnswer] = useState(null);
   const [notes, setNotes] = useState('');
 
-  useEffect(() => { getTemplate().then(setTemplate); }, []);
+
+   // IF NOT LOGGED IN, SHOW LOGIN PAGE
+  useEffect(() => { 
+    if (isAuthenticated) {
+      getTemplate().then(setTemplate); 
+    }
+  }, [isAuthenticated]); // Added isAuthenticated dependency
+
+  // 3. NOW you can handle the early return/gatekeeper
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={() => setIsAuthenticated(true)} />;
+  }
+
 
   const filteredItems = template?.items?.filter(item => item.category === activeCategory) || [];
 
