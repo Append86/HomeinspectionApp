@@ -68,16 +68,18 @@ function App() {
   };
 
   const Header = () => (
-    <header className="bg-append-navy p-6 shadow-xl mb-6 flex flex-col items-center">
-      <div className="flex items-center gap-2 mb-1">
-        <HomeIcon className="text-append-orange" size={24} />
-        <h1 className="text-white text-2xl font-bold tracking-tighter uppercase italic">
-          Append <span className="text-append-orange">One</span>
-        </h1>
-      </div>
-      <p className="text-slate-400 text-[9px] font-black tracking-[0.3em] uppercase opacity-70">Field Inspection Tool</p>
-    </header>
-  );
+  <header className="bg-white border-b border-slate-100 p-6 shadow-sm mb-6 flex flex-col items-center">
+    <div className="flex items-center gap-2 mb-1">
+      <HomeIcon className="text-append-orange" size={24} />
+      <h1 className="text-append-navy text-2xl font-black tracking-tighter uppercase italic">
+        Append <span className="text-append-orange">One</span>
+      </h1>
+    </div>
+    <p className="text-slate-400 text-[10px] font-black tracking-[0.3em] uppercase">
+      Field Inspection Tool
+    </p>
+  </header>
+);
 
   if (view === 'dashboard') {
     return (
@@ -159,12 +161,12 @@ function App() {
             
             <div className="pt-4 border-t border-slate-100 mt-2">
               <button 
-                onClick={() => downloadInspectionReport(template.id, template.property_address)}
-                className="w-full bg-append-navy text-white py-5 rounded-full font-black text-lg shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
-              >
-                <FileText size={20} className="text-append-orange" />
-                GENERATE PDF REPORT
-              </button>
+    onClick={() => downloadInspectionReport(template.id, template.property_address)}
+    className="w-full bg-append-navy text-black py-5 rounded-3xl font-black text-lg shadow-xl shadow-slate-200 active:scale-95 transition-all flex items-center justify-center gap-3"
+  >
+    <FileText size={20} className="text-append-orange" />
+    GENERATE PDF REPORT
+  </button>
             </div>
           </div>
         </div>
@@ -210,10 +212,18 @@ function App() {
                 </select>
               </div>
             )}
-            <div className="space-y-1">
-              <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Observations</label>
-              <textarea value={notes} onChange={e => setNotes(e.target.value)} rows="3" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-append-navy outline-none" placeholder="Findings..."></textarea>
-            </div>
+           <div className="space-y-2">
+  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+    Observations
+  </label>
+  <textarea 
+    value={notes} 
+    onChange={e => setNotes(e.target.value)} 
+    rows="4" 
+    className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl text-base font-bold text-append-navy outline-none focus:border-append-orange transition-colors placeholder:text-slate-300" 
+    placeholder="Type professional findings here..."
+  />
+</div>
             <div className="grid grid-cols-4 gap-2">
               {[1,2,3,4].map(i => (
                 <div key={i} className="aspect-square bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 border-2 border-dashed border-slate-200"><Camera size={20} /></div>
@@ -233,14 +243,30 @@ function App() {
       <Header />
       <div className="px-4 max-w-lg mx-auto">
         {view === 'grid' ? (
-          <div className="grid grid-cols-2 gap-4">
-            {Object.keys(CATEGORY_ICONS).map((cat) => (
-              <button key={cat} onClick={() => { if (cat === "General Info") { setView('general_info'); } else { setActiveCategory(cat); setView('list'); } }} className="flex flex-col items-center justify-center p-6 bg-white rounded-[2.5rem] shadow-sm border-b-8 border-append-orange active:translate-y-2 transition-all">
-                <div className="text-4xl mb-3">{CATEGORY_ICONS[cat]}</div>
-                <span className="text-[10px] font-black text-center text-append-navy uppercase px-1 leading-tight">{cat}</span>
-              </button>
-            ))}
-          </div>
+         // Inside your view === 'grid' section
+<div className="grid grid-cols-2 gap-4 p-4">
+  {Object.keys(CATEGORY_ICONS).map((cat) => (
+    <button 
+      key={cat} 
+      onClick={() => { 
+        if (cat === "General Info") { setView('general_info'); } 
+        else { setActiveCategory(cat); setView('list'); } 
+      }} 
+      className="group relative flex flex-col items-center justify-center p-8 bg-white rounded-append-xl shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-95 overflow-hidden"
+    >
+      {/* Decorative background accent that appears on hover */}
+      <div className="absolute top-0 right-0 w-16 h-16 bg-append-orange/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-[3]" />
+      
+      <div className="text-5xl mb-4 transform transition-transform group-hover:scale-110">
+        {CATEGORY_ICONS[cat]}
+      </div>
+      
+      <span className="text-[11px] font-black text-center text-append-navy uppercase tracking-widest leading-tight">
+        {cat}
+      </span>
+    </button>
+  ))}
+</div>
         ) : (
           <div className="animate-in slide-in-from-right duration-300 text-append-navy">
             <button onClick={() => setView('grid')} className="text-append-navy font-black text-xs tracking-widest flex items-center mb-6 uppercase"><ChevronLeft size={18} /> BACK TO SYSTEMS</button>
