@@ -26,11 +26,13 @@ function App() {
 
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access'));
 
-  const [template, setTemplate] = useState(null);
-  const [view, setView] = useState('grid');
+  const [inspections, setInspections] = useState([]); // Stores list of all your reports
+  const [template, setTemplate] = useState(null);    // Stores the ONE active report you clicked
+  const [view, setView] = useState('dashboard');      // Start at the list of reports
+
+  
   const [activeCategory, setActiveCategory] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  
   const [itemName, setItemName] = useState('');
   const [location, setLocation] = useState('');
   const [status, setStatus] = useState('Not Inspected');
@@ -39,16 +41,53 @@ function App() {
 
 
    // IF NOT LOGGED IN, SHOW LOGIN PAGE
-  useEffect(() => { 
+ useEffect(() => { 
     if (isAuthenticated) {
-      getTemplate().then(setTemplate); 
+      // Changed from getTemplate to getMyInspections
+      getMyInspections().then(setInspections); 
     }
-  }, [isAuthenticated]); // Added isAuthenticated dependency
+  }, [isAuthenticated]);
 
   // 3. NOW you can handle the early return/gatekeeper
   if (!isAuthenticated) {
     return <Login onLoginSuccess={() => setIsAuthenticated(true)} />;
   }
+
+  // DASHBOARD VIEW
+  if (view === 'dashboard') {
+    return (
+      <div className="min-h-screen bg-slate-50 p-6">
+        <Header />
+        <div className="max-w-lg mx-auto space-y-4">
+          <button 
+            onClick={async () => {
+              const addr = prompt("Property Address?");
+              const client = prompt("Client Name?");
+              if (addr && client) {
+                const newReport = await createInspectionFromTemplate(addr, client);
+                setTemplate(newReport);
+                setView('grid');
+              }
+            }}
+            className="w-full bg-append-orange p-8 rounded-[2.5rem] font-black text-xl shadow-xl active:scale-95 transition-all"
+          >
+            + NEW INSPECTION
+          </button>
+          
+          <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Your History</h2>
+          {inspections.map(ins => (
+            <button key={ins.id} onClick={() => { setTemplate(ins); setView('grid'); }} className="w-full bg-white p-6 rounded-[2rem] border-b-4 border-slate-200 shadow-sm text-left active:translate-y-1 transition-all">
+              <p className="font-black text-append-navy uppercase italic">{ins.property_address}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{ins.client_name} • {ins.inspection_status}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ... (the rest of your grid, list, and form views)
+
 
 
   const filteredItems = template?.items?.filter(item => item.category === activeCategory) || [];
