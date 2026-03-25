@@ -31,7 +31,9 @@ class Command(BaseCommand):
                     # We check for ending punctuation or starting keywords from your specific sheet
                     is_question = any(sub_cat.endswith(x) for x in [':', '?']) or \
                                   any(sub_cat.startswith(x) for x in [
-                                      'Disclosure',
+                                      'Describe', 'Methods', 'Visible', 
+                                      'Observe', 'Absence', 'Location of','Any',
+                                        'Condition of', 'Type of', 'Evidence of'
                                   ])
 
                     # 3. Create the item

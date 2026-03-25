@@ -139,48 +139,127 @@ function App() {
           </button>
           <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-200 space-y-6">
             <h2 className="text-2xl font-black text-append-navy mb-2 italic uppercase">Inspection Details</h2>
-            <div className="grid grid-cols-1 gap-4 max-h-[60vh] overflow-y-auto px-1">
+            
+            {/* Scrollable container for the many form fields */}
+            <div className="grid grid-cols-1 gap-4 max-h-[65vh] overflow-y-auto px-1 custom-scrollbar">
+              
+              {/* Property & Client Info */}
               <div className="space-y-1">
-                <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Property Address</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Property Address</label>
                 <input value={template?.property_address || ''} onChange={(e) => setTemplate({...template, property_address: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
               </div>
-              <div className="space-y-1">
-                <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Client Name</label>
-                <input value={template?.client_name || ''} onChange={(e) => setTemplate({...template, client_name: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Client Name</label>
+                  <input value={template?.client_name || ''} onChange={(e) => setTemplate({...template, client_name: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Client Email</label>
+                  <input type="email" value={template?.client_email || ''} onChange={(e) => setTemplate({...template, client_email: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
               </div>
+
+              {/* Inspection Logistics */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Date</label>
+                  <input type="date" value={template?.date_of_inspection || ''} onChange={(e) => setTemplate({...template, date_of_inspection: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Time</label>
+                  <input type="time" value={template?.inspection_time || ''} onChange={(e) => setTemplate({...template, inspection_time: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+              </div>
+
+              {/* Company Info */}
               <div className="space-y-1">
-                <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Inspection Company</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Inspection Company</label>
                 <input value={template?.inspection_company || ''} onChange={(e) => setTemplate({...template, inspection_company: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Inspector Name</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Company Address</label>
+                <input value={template?.inspection_company_address || ''} onChange={(e) => setTemplate({...template, inspection_company_address: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Company Phone</label>
+                  <input value={template?.phone_number || ''} onChange={(e) => setTemplate({...template, phone_number: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Company Email</label>
+                  <input type="email" value={template?.company_email || ''} onChange={(e) => setTemplate({...template, company_email: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+              </div>
+
+              {/* Inspector Details */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Inspector Name</label>
                 <input value={template?.inspector_name || ''} onChange={(e) => setTemplate({...template, inspector_name: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Weather</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">License #</label>
+                  <input value={template?.inspector_license_number || ''} onChange={(e) => setTemplate({...template, inspector_license_number: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">License Expiry</label>
+                  <input type="date" value={template?.license_expiration_date || ''} onChange={(e) => setTemplate({...template, license_expiration_date: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+              </div>
+
+              {/* Conditions & Building Info */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Weather</label>
                   <input value={template?.weather_conditions || ''} onChange={(e) => setTemplate({...template, weather_conditions: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" placeholder="Sunny" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Year Built</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">In Attendance</label>
+                  <input value={template?.in_attendance || ''} onChange={(e) => setTemplate({...template, in_attendance: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Occupancy</label>
+                  <input value={template?.occupancy || ''} onChange={(e) => setTemplate({...template, occupancy: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Bldg Type</label>
+                  <input value={template?.building_type || ''} onChange={(e) => setTemplate({...template, building_type: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Year Built</label>
                   <input type="number" value={template?.year_built || ''} onChange={(e) => setTemplate({...template, year_built: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy" />
                 </div>
               </div>
-             <div className="space-y-1 pt-2">
-  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
-    Report Status
-  </label>
-  <select 
-    value={template?.inspection_status || 'active'} 
-    onChange={(e) => setTemplate({...template, inspection_status: e.target.value})} 
-    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold text-append-navy outline-none focus:border-append-orange transition-colors"
-  >
-    <option value="active">In Progress (Active)</option>
-    <option value="final">Complete (Finalized)</option>
-  </select>
-</div>
+
+              {/* Agreement & Status */}
+              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <input 
+                  type="checkbox" 
+                  checked={template?.signed_agreement || false} 
+                  onChange={(e) => setTemplate({...template, signed_agreement: e.target.checked})} 
+                  className="w-5 h-5 accent-append-orange" 
+                />
+                <label className="text-[10px] font-black text-append-navy uppercase tracking-widest">Signed Agreement Received</label>
+              </div>
+
+              <div className="space-y-1 pt-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Report Status</label>
+                <select 
+                  value={template?.inspection_status || 'active'} 
+                  onChange={(e) => setTemplate({...template, inspection_status: e.target.value})} 
+                  className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold text-append-navy outline-none focus:border-append-orange transition-colors"
+                >
+                  <option value="active">In Progress (Active)</option>
+                  <option value="final">Complete (Finalized)</option>
+                </select>
+              </div>
             </div>
-            
+
             <button onClick={handleGeneralSave} className="w-full bg-append-orange text-append-navy py-5 rounded-3xl font-black text-lg shadow-xl active:scale-95">UPDATE GENERAL INFO</button>
             
             <div className="pt-4 border-t border-slate-100 mt-2">
