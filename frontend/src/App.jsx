@@ -14,6 +14,31 @@ const STATUS_OPTIONS = [
   "Minor Defect", "Significant Deficiency", "Cosmetic Defect", "See Notes", "Yes", "No", "N/A"
 ];
 
+const Modal = ({ isOpen, title, children, onClose, onConfirm, confirmText = "Confirm", isDelete = false }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-append-navy/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl scale-in-center">
+        <div className="p-8">
+          <h3 className="text-2xl font-black text-append-navy mb-4 italic uppercase">{title}</h3>
+          <div className="text-slate-600 font-medium">{children}</div>
+          <div className="mt-8 flex gap-3">
+            <button onClick={onClose} className="flex-1 py-4 rounded-full font-black text-slate-400 bg-slate-100 hover:bg-slate-200 transition-all uppercase tracking-widest text-xs">
+              Cancel
+            </button>
+            <button 
+              onClick={onConfirm} 
+              className={`flex-1 py-4 rounded-full font-black text-black transition-all uppercase tracking-widest text-xs shadow-lg ${isDelete ? 'bg-red-500 shadow-red-100' : 'bg-append-orange text-append-navy shadow-orange-100'}`}
+            >
+              {confirmText}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access'));
   const [inspections, setInspections] = useState([]); 
@@ -27,6 +52,10 @@ function App() {
   const [status, setStatus] = useState('Not Inspected');
   const [answer, setAnswer] = useState(null);
   const [notes, setNotes] = useState('');
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newInspectData, setNewInspectData] = useState({ address: '', client: '' });
+  const [errorMsg, setErrorMsg] = useState(null); // Replace alert() with this
 
   useEffect(() => { 
     if (isAuthenticated) {
@@ -47,6 +76,24 @@ function App() {
     setTemplate(null);
   };
 
+  // Add this function to handle the Modal's confirmation
+  const handleCreateRequest = async () => {
+    if (newInspectData.address && newInspectData.client) {
+      try {
+        const newReport = await createInspectionFromTemplate(newInspectData.address, newInspectData.client);
+        setTemplate(newReport);
+        setIsModalOpen(false); // Close the modal on success
+        setView('grid');       // Go to the category grid
+        // Optionally refresh the list
+        getMyInspections().then(setInspections);
+      } catch (err) {
+        setErrorMsg("Failed to create inspection");
+      }
+    } else {
+      setErrorMsg("Please provide both address and client name");
+    }
+  };
+
   const handleSelectItem = (item) => {
     setSelectedItem(item);
     setItemName(item.item_name || '');
@@ -64,7 +111,9 @@ function App() {
       const updatedItems = template.items.map(it => it.id === selectedItem.id ? { ...it, ...payload } : it);
       setTemplate({ ...template, items: updatedItems });
       setView('list');
-    } catch (err) { alert("Save failed."); }
+    } catch (err) { alert("Save failed.");
+      setErrorMsg("Save Failed - Check Connection"); // NEW MODERN WAY
+     }
   };
 
   const handleGeneralSave = async () => {
@@ -103,20 +152,14 @@ function App() {
       <div className="min-h-screen bg-slate-50 p-6">
         <Header />
         <div className="max-w-lg mx-auto space-y-4 text-append-navy">
+          {/* UPDATED BUTTON: No more prompt() here */}
           <button 
-            onClick={async () => {
-              const addr = prompt("Property Address?");
-              const client = prompt("Client Name?");
-              if (addr && client) {
-                const newReport = await createInspectionFromTemplate(addr, client);
-                setTemplate(newReport);
-                setView('grid');
-              }
-            }}
-            className="w-full bg-append-orange p-8 rounded-[2.5rem] font-black text-xl shadow-xl active:scale-95 transition-all text-append-navy"
+            onClick={() => setIsModalOpen(true)}
+            className="w-full bg-append-orange p-8 rounded-[2.5rem] font-black text-xl shadow-xl hover:shadow-orange-200 active:scale-95 transition-all text-append-navy"
           >
             + NEW INSPECTION
           </button>
+
           <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Recent Inspections</h2>
           {inspections.map(ins => (
             <button key={ins.id} onClick={() => { setTemplate(ins); setView('grid'); }} className="w-full bg-white p-6 rounded-[2rem] border-b-4 border-slate-200 shadow-sm text-left active:translate-y-1 transition-all">
@@ -125,6 +168,35 @@ function App() {
             </button>
           ))}
         </div>
+
+        {/* NEW MODAL: This replaces the browser prompts */}
+        <Modal 
+          isOpen={isModalOpen} 
+          title="New Inspection" 
+          onClose={() => setIsModalOpen(false)} 
+          onConfirm={handleCreateRequest}
+          confirmText="Create Report"
+        >
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Property Address</label>
+              <input 
+                autoFocus
+                className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-append-navy font-bold outline-none focus:border-append-orange transition-colors"
+                placeholder="123 Main St..."
+                onChange={(e) => setNewInspectData({...newInspectData, address: e.target.value})}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Client Name</label>
+              <input 
+                className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-append-navy font-bold outline-none focus:border-append-orange transition-colors"
+                placeholder="John Doe"
+                onChange={(e) => setNewInspectData({...newInspectData, client: e.target.value})}
+              />
+            </div>
+          </div>
+        </Modal>
       </div>
     );
   }
@@ -370,7 +442,7 @@ function App() {
             <h2 className="text-2xl font-black mb-6 italic uppercase">{activeCategory}</h2>
             <div className="space-y-3">
               {filteredItems.map((item) => {
-                const isDone = (item.answer !== null) || (item.status && item.status !== 'Not Inspected');
+                const isDone = (item.status && item.status !== 'Not Inspected');
                 return (
                   <button key={item.id} onClick={() => handleSelectItem(item)} className={`w-full text-left p-6 rounded-[2rem] shadow-sm border-2 transition-all flex justify-between items-center ${isDone ? 'bg-white border-green-500' : 'bg-white border-slate-100'}`}>
                     <div className="flex flex-col pr-4">
@@ -385,6 +457,13 @@ function App() {
           </div>
         )}
       </div>
+      {/* Minimal Modern Error Toast */}
+{errorMsg && (
+  <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-append-navy text-white px-8 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-2xl flex items-center gap-3 animate-bounce">
+    <span className="text-append-orange">!</span> {errorMsg}
+    <button onClick={() => setErrorMsg(null)} className="ml-4 opacity-50 hover:opacity-100">X</button>
+  </div>
+)}
     </div>
   );
 }
