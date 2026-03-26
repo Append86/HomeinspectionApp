@@ -65,6 +65,10 @@ class InspectionItem(models.Model):
         ('MINOR', 'Minor Defect'),
         ('SIG', 'Significantly Deficient'),
         ('COS', 'Cosmetic Defect'),
+        ('NOTE', 'See Notes'),
+        ('YES', 'Yes'),
+        ('NO', 'No'),
+        ('NA', 'N/A'),
     ]
 
     ANSWER_CHOICES = [
