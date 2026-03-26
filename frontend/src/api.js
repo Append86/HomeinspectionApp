@@ -54,3 +54,19 @@ export const downloadInspectionReport = async (inspectionId, propertyAddress) =>
     alert("Could not generate report. Please try again.");
   }
 };
+
+// Add this to your existing api.js
+export const createItem = async (data) => {
+  const response = await axios.post(`${API_URL}items/`, data, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('access')}` }
+  });
+  return response.data;
+};
+
+// Add to frontend/src/api.js
+export const deleteItem = async (itemId) => {
+  const response = await axios.delete(`${API_URL}items/${itemId}/`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('access')}` }
+  });
+  return response.data;
+};

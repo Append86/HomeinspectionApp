@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getMyInspections, updateItem, updateInspection, createInspectionFromTemplate, downloadInspectionReport } from './api';
-import { ChevronLeft, Camera, CheckCircle, Home as HomeIcon, FileText, LogOut } from 'lucide-react';
+import { ChevronLeft, Camera, CheckCircle, Home as HomeIcon, FileText, LogOut, Trash2 } from 'lucide-react';
 import Login from './Login';
+
 
 const CATEGORY_ICONS = {
   "General Info": "📋", "Structural system and foundation": "🏗️", "Exterior": "🏡", "Plumbing System": "💧",
@@ -10,8 +11,17 @@ const CATEGORY_ICONS = {
 };
 
 const STATUS_OPTIONS = [
-  "Not Inspected", "Satisfactory", "Monitor", "Near End of Service Life",
-  "Minor Defect", "Significant Deficiency", "Cosmetic Defect", "See Notes", "Yes", "No", "N/A"
+ { key: 'NI', label: 'Not Inspected' },
+  { key: 'NDO', label: 'No Defects Observed' },
+  { key: 'MON', label: 'Monitor' },
+  { key: 'EOSL', label: 'Near End of Service Life' },
+  { key: 'MINOR', label: 'Minor Defect' },
+  { key: 'SIG', label: 'Significant Deficiency' },
+  { key: 'COS', label: 'Cosmetic Defect' },
+  { key: 'NOTE', label: 'See Notes' },
+  { key: 'YES', label: 'Yes' },
+  { key: 'NO', label: 'No' },
+  { key: 'NA', label: 'N/A'},
 ];
 
 const Modal = ({ isOpen, title, children, onClose, onConfirm, confirmText = "Confirm", isDelete = false }) => {
@@ -104,16 +114,57 @@ function App() {
     setView('form');
   };
 
-  const handleSave = async () => {
-    const payload = { item_name: itemName, location, status, answer, note: notes };
+  const handleDeleteItem = async (e, itemId) => {
+    e.stopPropagation(); // Prevents clicking the trash from opening the form
+    
+    if (window.confirm("Are you sure you want to delete this finding?")) {
+      try {
+        await deleteItem(itemId);
+        // Remove the item from local state
+        const updatedItems = template.items.filter(it => it.id !== itemId);
+        setTemplate({ ...template, items: updatedItems });
+        setErrorMsg("Finding Deleted"); 
+      } catch (err) {
+        setErrorMsg("Delete Failed");
+      }
+    }
+  };
+
+  // Update your handleSave function
+  const handleSave = async (shouldAddAnother = false) => {
+    const payload = { 
+      inspection: template.id,
+      category: selectedItem.category,
+      sub_category: selectedItem.sub_category,
+      item_name: itemName, 
+      location: location, 
+      status: status, 
+      note: notes,
+      field_type: 'FINDING'
+    };
+
     try {
-      await updateItem(selectedItem.id, payload);
-      const updatedItems = template.items.map(it => it.id === selectedItem.id ? { ...it, ...payload } : it);
+      // Logic: Create a NEW item instead of PATCHing the template item
+      const newItem = await createItem(payload);
+      
+      // Update local state with the new list
+      const updatedItems = [...template.items, newItem];
       setTemplate({ ...template, items: updatedItems });
-      setView('list');
+
+      if (shouldAddAnother) {
+        // Reset form for next entry but stay on page
+        setItemName(selectedItem.sub_category);
+        setLocation('');
+        setNotes('');
+        setStatus('NDO'); 
+        setErrorMsg("Finding Saved - Add Next"); // Success toast
+      } else {
+        setView('list');
+        setSelectedItem(null);
+      }
     } catch (err) {
-      setErrorMsg("Save Failed - Check Connection"); // NEW MODERN WAY
-     }
+      setErrorMsg("Save Failed - Check Connection");
+    }
   };
 
   const handleGeneralSave = async () => {
@@ -378,13 +429,17 @@ function App() {
             {/* Unified Status Dropdown (Replaces YES/NO/NA logic) */}
             <div className="space-y-2">
               <label className="text-[9px] font-black text-slate-600 uppercase ml-1">System Status</label>
-              <select 
-                value={status} 
-                onChange={e => setStatus(e.target.value)} 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy"
-              >
-                {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-              </select>
+             <select 
+  value={status} 
+  onChange={e => setStatus(e.target.value)} 
+  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy"
+>
+  {STATUS_OPTIONS.map(opt => (
+    <option key={opt.key} value={opt.key}>
+      {opt.label}
+    </option>
+  ))}
+</select>
             </div>
 
             {/* Updated Label: Notes/Observations */}
@@ -407,9 +462,23 @@ function App() {
               ))}
             </div>
 
-            <button onClick={handleSave} className="w-full bg-append-orange text-append-navy py-5 rounded-full font-black text-lg shadow-xl active:scale-95 flex items-center justify-center gap-2">
-              <CheckCircle size={20} /> SAVE FINDING
-            </button>
+            <div className="flex flex-col gap-3 mt-4">
+  {/* Primary Action: Save and keep going */}
+  <button 
+    onClick={() => handleSave(true)} 
+    className="w-full bg-slate-100 text-append-navy py-4 rounded-full font-black text-xs tracking-widest border border-slate-200 active:scale-95 transition-all flex items-center justify-center gap-2"
+  >
+    + SAVE & ADD ANOTHER
+  </button>
+
+  {/* Finalize Action: Save and go back */}
+  <button 
+    onClick={() => handleSave(false)} 
+    className="w-full bg-append-orange text-append-navy py-5 rounded-full font-black text-lg shadow-xl shadow-orange-100 active:scale-95 transition-all flex items-center justify-center gap-2"
+  >
+    <CheckCircle size={20} /> SAVE & CLOSE
+  </button>
+</div>
           </div>
         </div>
       </div>
@@ -442,17 +511,39 @@ function App() {
             <h2 className="text-2xl font-black mb-6 italic uppercase">{activeCategory}</h2>
             <div className="space-y-3">
               {filteredItems.map((item) => {
-                const isDone = (item.status && item.status !== 'Not Inspected');
-                return (
-                  <button key={item.id} onClick={() => handleSelectItem(item)} className={`w-full text-left p-6 rounded-[2rem] shadow-sm border-2 transition-all flex justify-between items-center ${isDone ? 'bg-white border-green-500' : 'bg-white border-slate-100'}`}>
-                    <div className="flex flex-col pr-4">
-                      <span className={`text-sm font-bold ${isDone ? 'text-green-700' : 'text-slate-700'}`}>{item.sub_category}</span>
-                      {isDone && <span className="text-[9px] font-black text-green-500 uppercase mt-1 tracking-tighter">Completed: {item.answer || item.status}</span>}
-                    </div>
-                    <span className={isDone ? 'text-green-500 font-black' : 'text-slate-300'}>{isDone ? '✓' : '→'}</span>
-                  </button>
-                );
-              })}
+  const isDone = (item.status && item.status !== 'NI'); // Updated to use key NI
+  return (
+    <button 
+      key={item.id} 
+      onClick={() => handleSelectItem(item)} 
+      className={`w-full text-left p-6 rounded-[2rem] shadow-sm border-2 transition-all flex justify-between items-center group ${isDone ? 'bg-white border-green-500' : 'bg-white border-slate-100'}`}
+    >
+      <div className="flex flex-col pr-4">
+        <span className={`text-sm font-bold ${isDone ? 'text-green-700' : 'text-slate-700'}`}>
+          {item.sub_category} {item.location && `(${item.location})`}
+        </span>
+        {isDone && (
+          <span className="text-[9px] font-black text-green-500 uppercase mt-1 tracking-tighter">
+            Completed: {STATUS_OPTIONS.find(o => o.key === item.status)?.label || item.status}
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3">
+        {/* Trash Icon: Only shows for items that aren't part of the master template (optional logic) */}
+        <button 
+          onClick={(e) => handleDeleteItem(e, item.id)}
+          className="p-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+        >
+          <Trash2 size={18} />
+        </button>
+        <span className={isDone ? 'text-green-500 font-black' : 'text-slate-300'}>
+          {isDone ? '✓' : '→'}
+        </span>
+      </div>
+    </button>
+  );
+})}
             </div>
           </div>
         )}

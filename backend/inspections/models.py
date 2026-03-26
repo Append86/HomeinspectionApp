@@ -59,7 +59,7 @@ class InspectionItem(models.Model):
     # We add 'blank=True, null=True' so it can be empty for questions
     STATUS_CHOICES = [
         ('NI', 'Not Inspected'),
-        ('SAT', 'Satisfactory'),
+        ('NDO', 'No Defects Observed'),
         ('MON', 'Monitor'),
         ('EOSL', 'Near End of Service Life'),
         ('MINOR', 'Minor Defect'),
