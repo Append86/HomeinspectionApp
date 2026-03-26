@@ -77,20 +77,20 @@ function App() {
   };
 
   // Add this function to handle the Modal's confirmation
-  const handleCreateRequest = async () => {
+ const handleCreateRequest = async () => {
     if (newInspectData.address && newInspectData.client) {
       try {
         const newReport = await createInspectionFromTemplate(newInspectData.address, newInspectData.client);
         setTemplate(newReport);
-        setIsModalOpen(false); // Close the modal on success
-        setView('grid');       // Go to the category grid
-        // Optionally refresh the list
+        setIsModalOpen(false); 
+        setView('grid');
+        setNewInspectData({ address: '', client: '' }); 
         getMyInspections().then(setInspections);
       } catch (err) {
-        setErrorMsg("Failed to create inspection");
+        setErrorMsg("Failed to create new inspection report"); // NEW
       }
     } else {
-      setErrorMsg("Please provide both address and client name");
+      setErrorMsg("Property address and client name are required"); // NEW
     }
   };
 
@@ -111,7 +111,7 @@ function App() {
       const updatedItems = template.items.map(it => it.id === selectedItem.id ? { ...it, ...payload } : it);
       setTemplate({ ...template, items: updatedItems });
       setView('list');
-    } catch (err) { alert("Save failed.");
+    } catch (err) {
       setErrorMsg("Save Failed - Check Connection"); // NEW MODERN WAY
      }
   };
@@ -120,7 +120,7 @@ function App() {
     try {
       await updateInspection(template.id, template);
       setView('grid');
-    } catch (err) { alert("Update failed."); }
+    } catch (err) { setErrorMsg("Update Failed - Server Error"); }
   };
 
   // --- MODERN HEADER WITH LOGOUT ---
