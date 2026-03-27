@@ -154,7 +154,7 @@ const handleSave = async (shouldAddAnother = false) => {
     location: location, 
     status: status, 
     note: notes,
-    field_type: 'FINDING'
+    field_type: selectedItem.field_type || 'FINDING'
   };
 
   try {
@@ -179,6 +179,18 @@ const handleSave = async (shouldAddAnother = false) => {
     setErrorMsg("Database Save Failed - Check Backend Logs");
   }
 };
+
+// Add this function back to resolve the ReferenceError
+  const handleGeneralSave = async () => {
+    try {
+      // Logic: Save the top-level inspection data (address, client, etc.)
+      await updateInspection(template.id, template);
+      setErrorMsg("General Info Updated Successfully");
+      setView('grid');
+    } catch (err) { 
+      setErrorMsg("Update Failed - Server Error"); 
+    }
+  };
   // --- MODERN HEADER WITH LOGOUT ---
   const Header = () => (
     <header className="bg-white border-b border-slate-100 p-6 shadow-sm mb-6 flex flex-col items-center relative">
@@ -555,10 +567,17 @@ const isDone = (item.status && item.status !== 'NI' && item.status !== '') || (i
         )}
       </div>
       {/* Minimal Modern Error Toast */}
+{/* Update this section at the bottom of App.jsx */}
 {errorMsg && (
-  <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-append-navy text-white px-8 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-2xl flex items-center gap-3 animate-bounce">
-    <span className="text-append-orange">!</span> {errorMsg}
-    <button onClick={() => setErrorMsg(null)} className="ml-4 opacity-50 hover:opacity-100">X</button>
+  <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-8 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-2xl flex items-center gap-3 animate-bounce border border-slate-700">
+    <span className="text-append-orange text-lg">●</span> 
+    <span>{errorMsg}</span>
+    <button 
+      onClick={() => setErrorMsg(null)} 
+      className="ml-4 bg-white/10 hover:bg-white/20 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+    >
+      ✕
+    </button>
   </div>
 )}
     </div>
