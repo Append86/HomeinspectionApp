@@ -8,11 +8,13 @@ class PhotoSerializer(serializers.ModelSerializer):
 
 class InspectionItemSerializer(serializers.ModelSerializer):
     photos = PhotoSerializer(many=True, read_only=True)
+    # Ensure inspection is included as a primary key field so the API can link it
+    inspection = serializers.PrimaryKeyRelatedField(queryset=Inspection.objects.all())
 
     class Meta:
         model = InspectionItem
         fields = [
-            'id', 'category', 'sub_category', 'field_type', 
+            'id', 'inspection', 'category', 'sub_category', 'field_type', 
             'status', 'answer', 'item_name', 'location', 'note', 'photos'
         ]
 
@@ -22,5 +24,4 @@ class InspectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Inspection
         fields = '__all__'
-
         

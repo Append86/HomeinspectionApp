@@ -56,9 +56,11 @@ export const downloadInspectionReport = async (inspectionId, propertyAddress) =>
 };
 
 // Add this to your existing api.js
+// frontend/src/api.js
 export const createItem = async (data) => {
+  const token = localStorage.getItem('access'); // Retrieve the stored login token
   const response = await axios.post(`${API_URL}items/`, data, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('access')}` }
+    headers: { Authorization: `Bearer ${token}` }
   });
   return response.data;
 };

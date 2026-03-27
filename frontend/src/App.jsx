@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getMyInspections, updateItem, updateInspection, createInspectionFromTemplate, downloadInspectionReport } from './api';
+import { getMyInspections, updateItem, updateInspection, createInspectionFromTemplate, downloadInspectionReport, createItem, deleteItem} from './api';
 import { ChevronLeft, Camera, CheckCircle, Home as HomeIcon, FileText, LogOut, Trash2 } from 'lucide-react';
 import Login from './Login';
 
@@ -106,14 +106,18 @@ function App() {
 
   const handleSelectItem = (item) => {
     setSelectedItem(item);
-    setItemName(item.item_name || '');
+    // Use the sub_category as a fallback if item_name is empty
+    setItemName(item.item_name || item.sub_category || '');
     setLocation(item.location || '');
     setNotes(item.note || '');
     setAnswer(item.answer || null);
-    setStatus(item.status || (item.field_type === 'QUESTION' ? '' : 'Not Inspected'));
+    
+    // CRITICAL: Always set the status to the short KEY (NI, NDO, etc.), 
+    // never the long label string.
+    setStatus(item.status || 'NI'); 
+    
     setView('form');
   };
-
   const handleDeleteItem = async (e, itemId) => {
     e.stopPropagation(); // Prevents clicking the trash from opening the form
     
@@ -131,52 +135,50 @@ function App() {
   };
 
   // Update your handleSave function
-  const handleSave = async (shouldAddAnother = false) => {
-    const payload = { 
-      inspection: template.id,
-      category: selectedItem.category,
-      sub_category: selectedItem.sub_category,
-      item_name: itemName, 
-      location: location, 
-      status: status, 
-      note: notes,
-      field_type: 'FINDING'
-    };
+const handleSave = async (shouldAddAnother = false) => {
+  // CRITICAL: Ensure template and selectedItem exist before sending
+  if (!template?.id) {
+    setErrorMsg("System Error: No active inspection ID found.");
+    return;
+  }
+  if (!selectedItem?.category) {
+    setErrorMsg("System Error: Category data is missing.");
+    return;
+  }
 
-    try {
-      // Logic: Create a NEW item instead of PATCHing the template item
-      const newItem = await createItem(payload);
-      
-      // Update local state with the new list
+  const payload = { 
+    inspection: template.id, // Must be the numeric ID
+    category: selectedItem.category,
+    sub_category: selectedItem.sub_category,
+    item_name: itemName || selectedItem.sub_category, 
+    location: location, 
+    status: status, 
+    note: notes,
+    field_type: 'FINDING'
+  };
+
+  try {
+    const newItem = await createItem(payload);
     
-      setTemplate(prevTemplate => ({
-  ...prevTemplate,
-  items: [...prevTemplate.items, newItem]
-}));
+    setTemplate(prevTemplate => ({
+      ...prevTemplate,
+      items: [...prevTemplate.items, newItem]
+    }));
 
-      if (shouldAddAnother) {
-        // Reset form for next entry but stay on page
-        setItemName(selectedItem.sub_category);
-        setLocation('');
-        setNotes('');
-        setStatus('NI'); 
-        setErrorMsg("Finding Saved - Add Next"); // Success toast
-      } else {
-        setView('list');
-        setSelectedItem(null);
-      }
-    } catch (err) {
-      setErrorMsg("Save Failed - Check Connection");
+    if (shouldAddAnother) {
+      setLocation('');
+      setNotes('');
+      setStatus('NI'); 
+      setErrorMsg("Finding Saved - Add Next");
+    } else {
+      setView('list');
+      setSelectedItem(null);
     }
-  };
-
-  const handleGeneralSave = async () => {
-    try {
-      await updateInspection(template.id, template);
-      setView('grid');
-    } catch (err) { setErrorMsg("Update Failed - Server Error"); }
-  };
-
+  } catch (err) {
+    // If the server still returns 500, the error is in the Serializer
+    setErrorMsg("Database Save Failed - Check Backend Logs");
+  }
+};
   // --- MODERN HEADER WITH LOGOUT ---
   const Header = () => (
     <header className="bg-white border-b border-slate-100 p-6 shadow-sm mb-6 flex flex-col items-center relative">
@@ -515,7 +517,7 @@ function App() {
             <div className="space-y-3">
               {filteredItems.map((item) => {
   // Only highlight green if it has a specific defect status OR a note
-const isDone = item.status && item.status !== 'NI' && item.status !== '';
+const isDone = (item.status && item.status !== 'NI' && item.status !== '') || (item.answer && item.answer !== '');
   return (
     <button 
       key={item.id} 
