@@ -149,7 +149,10 @@ function App() {
       
       // Update local state with the new list
       const updatedItems = [...template.items, newItem];
-      setTemplate({ ...template, items: updatedItems });
+      setTemplate(prevTemplate => ({
+  ...prevTemplate,
+  items: [...prevTemplate.items, newItem]
+}));
 
       if (shouldAddAnother) {
         // Reset form for next entry but stay on page
@@ -511,7 +514,8 @@ function App() {
             <h2 className="text-2xl font-black mb-6 italic uppercase">{activeCategory}</h2>
             <div className="space-y-3">
               {filteredItems.map((item) => {
-  const isDone = (item.status && item.status !== 'NI'); // Updated to use key NI
+  // Only highlight green if it has a specific defect status OR a note
+const isDone = item.status && !['NI', '', null].includes(item.status);
   return (
     <button 
       key={item.id} 
