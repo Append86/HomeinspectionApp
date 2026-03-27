@@ -549,12 +549,7 @@ const isDone = (item.status && item.status !== 'NI' && item.status !== '') || (i
 
       <div className="flex items-center gap-3">
         {/* Trash Icon: Only shows for items that aren't part of the master template (optional logic) */}
-        <button 
-          onClick={(e) => handleDeleteItem(e, item.id)}
-          className="p-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-        >
-          <Trash2 size={18} />
-        </button>
+        
         <span className={isDone ? 'text-green-500 font-black' : 'text-slate-300'}>
           {isDone ? '✓' : '→'}
         </span>
