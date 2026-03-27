@@ -59,7 +59,7 @@ function App() {
   
   const [itemName, setItemName] = useState('');
   const [location, setLocation] = useState('');
-  const [status, setStatus] = useState('Not Inspected');
+  const [status, setStatus] = useState('NI');
   const [answer, setAnswer] = useState(null);
   const [notes, setNotes] = useState('');
 
@@ -148,7 +148,7 @@ function App() {
       const newItem = await createItem(payload);
       
       // Update local state with the new list
-      const updatedItems = [...template.items, newItem];
+    
       setTemplate(prevTemplate => ({
   ...prevTemplate,
   items: [...prevTemplate.items, newItem]
@@ -159,7 +159,7 @@ function App() {
         setItemName(selectedItem.sub_category);
         setLocation('');
         setNotes('');
-        setStatus('NDO'); 
+        setStatus('NI'); 
         setErrorMsg("Finding Saved - Add Next"); // Success toast
       } else {
         setView('list');
@@ -468,7 +468,7 @@ function App() {
             <div className="flex flex-col gap-3 mt-4">
   {/* Primary Action: Save and keep going */}
   <button 
-    onClick={() => handleSave(true)} 
+    onClick={() => handleSave(true)}
     className="w-full bg-slate-100 text-append-navy py-4 rounded-full font-black text-xs tracking-widest border border-slate-200 active:scale-95 transition-all flex items-center justify-center gap-2"
   >
     + SAVE & ADD ANOTHER
@@ -476,7 +476,7 @@ function App() {
 
   {/* Finalize Action: Save and go back */}
   <button 
-    onClick={() => handleSave(false)} 
+    onClick={() => handleSave(false)}
     className="w-full bg-append-orange text-append-navy py-5 rounded-full font-black text-lg shadow-xl shadow-orange-100 active:scale-95 transition-all flex items-center justify-center gap-2"
   >
     <CheckCircle size={20} /> SAVE & CLOSE
@@ -515,7 +515,7 @@ function App() {
             <div className="space-y-3">
               {filteredItems.map((item) => {
   // Only highlight green if it has a specific defect status OR a note
-const isDone = item.status && !['NI', '', null].includes(item.status);
+const isDone = item.status && item.status !== 'NI' && item.status !== '';
   return (
     <button 
       key={item.id} 
