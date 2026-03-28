@@ -115,20 +115,20 @@ function App() {
   setView('form');
 };
   const handleDeleteItem = async (e, itemId) => {
-    e.stopPropagation(); // Prevents clicking the trash from opening the form
-    
-    if (window.confirm("Are you sure you want to delete this finding?")) {
-      try {
-        await deleteItem(itemId);
-        // Remove the item from local state
-        const updatedItems = template.items.filter(it => it.id !== itemId);
-        setTemplate({ ...template, items: updatedItems });
-        setErrorMsg("Finding Deleted"); 
-      } catch (err) {
-        setErrorMsg("Delete Failed");
-      }
+  e.stopPropagation(); // CRITICAL: Stops the form from opening
+  
+  if (window.confirm("Are you sure you want to delete this specific entry?")) {
+    try {
+      await deleteItem(itemId);
+      // Remove the item from your current local template state
+      const updatedItems = template.items.filter(it => it.id !== itemId);
+      setTemplate({ ...template, items: updatedItems });
+      setErrorMsg("Entry Removed"); 
+    } catch (err) {
+      setErrorMsg("Delete Failed - Server Error");
     }
-  };
+  }
+};
 
   // Update your handleSave function
 const handleSave = async (shouldAddAnother = false) => {
@@ -559,13 +559,16 @@ const hasEntry = (item) => {
             <h2 className="text-2xl font-black mb-6 italic uppercase">{activeCategory}</h2>
             <div className="space-y-3">
               {filteredItems.map((item) => {
-  // Replace the old isDone line with this:
-const isDone = hasEntry(item);
+  // Use your hasEntry logic for colors and checks
+  const isDone = hasEntry(item);
+  
   return (
-    <button 
+    <div 
       key={item.id} 
       onClick={() => handleSelectItem(item)} 
-      className={`w-full text-left p-6 rounded-[2rem] shadow-sm border-2 transition-all flex justify-between items-center group ${isDone ? 'bg-white border-green-500' : 'bg-white border-slate-100'}`}
+      className={`w-full text-left p-6 rounded-[2rem] shadow-sm border-2 transition-all flex justify-between items-center group cursor-pointer ${
+        isDone ? 'bg-white border-green-500 shadow-green-50' : 'bg-white border-slate-100'
+      }`}
     >
       <div className="flex flex-col pr-4">
         <span className={`text-sm font-bold ${isDone ? 'text-green-700' : 'text-slate-700'}`}>
@@ -573,19 +576,30 @@ const isDone = hasEntry(item);
         </span>
         {isDone && (
           <span className="text-[9px] font-black text-green-500 uppercase mt-1 tracking-tighter">
-            Completed: {STATUS_OPTIONS.find(o => o.key === item.status)?.label || item.status}
+            {STATUS_OPTIONS.find(o => o.key === item.status)?.label || item.status}
           </span>
         )}
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Trash Icon: Only shows for items that aren't part of the master template (optional logic) */}
+        {/* TRASH ICON LOGIC: 
+            1. Only show if 'isDone' is true (it's a recorded entry, not a blank template)
+            2. Removed 'opacity-0' so it's always visible on mobile/touch
+        */}
+        {isDone && (
+          <button 
+            onClick={(e) => handleDeleteItem(e, item.id)}
+            className="p-3 text-slate-400 hover:text-red-500 transition-colors active:scale-90"
+          >
+            <Trash2 size={20} />
+          </button>
+        )}
         
         <span className={isDone ? 'text-green-500 font-black' : 'text-slate-300'}>
           {isDone ? '✓' : '→'}
         </span>
       </div>
-    </button>
+    </div>
   );
 })}
             </div>
