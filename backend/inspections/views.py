@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Inspection, InspectionItem
-from .serializers import InspectionSerializer, InspectionItemSerializer
+from .models import Inspection, InspectionItem, Photo
+from .serializers import InspectionSerializer, InspectionItemSerializer, PhotoSerializer
 from .utils import render_to_pdf
 from django.http import HttpResponse
 
@@ -76,3 +76,11 @@ class InspectionItemViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return InspectionItem.objects.filter(inspection__user=self.request.user)
+    
+class PhotoViewSet(viewsets.ModelViewSet):
+    serializer_class = PhotoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Only return photos belonging to the current user's inspections
+        return Photo.objects.filter(item__inspection__user=self.request.user)

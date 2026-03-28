@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getMyInspections, updateItem, updateInspection, createInspectionFromTemplate, downloadInspectionReport, createItem, deleteItem} from './api';
+import { getMyInspections, updateItem, updateInspection, createInspectionFromTemplate, downloadInspectionReport, createItem, deleteItem, uploadPhoto} from './api';
 import { ChevronLeft, Camera, CheckCircle, Home as HomeIcon, FileText, LogOut, Trash2 } from 'lucide-react';
 import Login from './Login';
 
@@ -150,7 +150,6 @@ const handleSave = async (shouldAddAnother = false) => {
     sub_category: selectedItem.sub_category,
     item_name: itemName || selectedItem.sub_category, 
     location: location, 
-    // FORCE KEY CHECK: ensures we send 'NI' instead of 'Not Inspected'
     status: status.length > 5 ? 'NI' : status, 
     note: notes,
     field_type: selectedItem.field_type || 'FINDING'
@@ -161,16 +160,21 @@ const handleSave = async (shouldAddAnother = false) => {
     setTemplate(prev => ({ ...prev, items: [...prev.items, newItem] }));
 
     if (shouldAddAnother) {
-      setLocation('');
-      setNotes('');
-      setStatus('NI'); 
+      // --- RESET DATA FOR THE NEXT FINDING ---
+      setItemName(''); // Clear the name
+      setLocation(''); // Clear the location
+      setNotes('');    // Clear the notes
+      setStatus('NI'); // Reset status to default
+      
+      // NEW LINE: This clears the photos from the UI for the next entry
+      setSelectedItem({ ...selectedItem, id: null, photos: [] }); 
+      
       setErrorMsg("Saved - Add Next");
     } else {
       setView('list');
       setSelectedItem(null);
     }
   } catch (err) {
-    // This is where you see the real error in Chrome Network -> Response
     setErrorMsg("Save Failed - Data Format Error");
   }
 };
@@ -217,6 +221,30 @@ const hasEntry = (item) => {
       </button>
     </header>
   );
+
+  const handlePhotoUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file || !selectedItem?.id) return;
+
+  try {
+    setErrorMsg("Uploading Photo...");
+    const newPhoto = await uploadPhoto(selectedItem.id, file);
+    
+    // Update local state so the photo appears immediately
+    const updatedItems = template.items.map(it => {
+      if (it.id === selectedItem.id) {
+        return { ...it, photos: [...(it.photos || []), newPhoto] };
+      }
+      return it;
+    });
+    
+    setTemplate({ ...template, items: updatedItems });
+    setSelectedItem({ ...selectedItem, photos: [...(selectedItem.photos || []), newPhoto] });
+    setErrorMsg("Photo Saved");
+  } catch (err) {
+    setErrorMsg("Photo Upload Failed");
+  }
+};
 
   if (view === 'dashboard') {
     return (
@@ -481,11 +509,37 @@ const hasEntry = (item) => {
               />
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="aspect-square bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 border-2 border-dashed border-slate-200"><Camera size={20} /></div>
-              ))}
-            </div>
+            <div className="space-y-2">
+  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+    Photos ({selectedItem.photos?.length || 0})
+  </label>
+  
+  <div className="grid grid-cols-4 gap-2">
+    {/* Show existing uploaded photos */}
+    {selectedItem.photos?.map((photo, index) => (
+      <div key={index} className="aspect-square rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
+        <img 
+          src={photo.image} 
+          alt="Finding" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+    ))}
+
+    {/* The "Add Photo" Button */}
+    <label className="aspect-square bg-slate-50 rounded-2xl flex flex-col items-center justify-center text-append-orange border-2 border-dashed border-slate-200 cursor-pointer active:scale-95 transition-all">
+      <Camera size={24} />
+      <span className="text-[8px] font-black mt-1 uppercase">Add</span>
+      <input 
+        type="file" 
+        accept="image/*" 
+        capture="environment" // This triggers the back camera on mobile
+        className="hidden" 
+        onChange={handlePhotoUpload}
+      />
+    </label>
+  </div>
+</div>
 
             <div className="flex flex-col gap-3 mt-4">
   {/* Primary Action: Save and keep going */}

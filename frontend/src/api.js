@@ -72,3 +72,14 @@ export const deleteItem = async (itemId) => {
   });
   return response.data;
 };
+
+export const uploadPhoto = async (itemId, file) => {
+  const formData = new FormData();
+  formData.append('item', itemId);
+  formData.append('image', file);
+
+  const response = await api.post('/api/photos/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return response.data;
+};
