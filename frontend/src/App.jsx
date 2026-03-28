@@ -176,6 +176,14 @@ const handleSave = async (shouldAddAnother = false) => {
       setErrorMsg("Update Failed - Server Error"); 
     }
   };
+
+  // Helper to determine if a sub-category has a real entry
+const hasEntry = (item) => {
+  return (item.note && item.note.trim() !== "") || 
+         (item.location && item.location.trim() !== "") || 
+         (item.status && item.status !== 'NI' && item.status !== 'Not Inspected');
+};
+
   // --- MODERN HEADER WITH LOGOUT ---
   const Header = () => (
     <header className="bg-white border-b border-slate-100 p-6 shadow-sm mb-6 flex flex-col items-center relative">
@@ -500,17 +508,50 @@ const handleSave = async (shouldAddAnother = false) => {
       <div className="px-4 max-w-lg mx-auto">
         {view === 'grid' ? (
           <div className="grid grid-cols-2 gap-4 p-4">
-            {Object.keys(CATEGORY_ICONS).map((cat) => (
-              <button 
-                key={cat} 
-                onClick={() => { if (cat === "General Info") { setView('general_info'); } else { setActiveCategory(cat); setView('list'); } }} 
-                className="group relative flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-95 overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-16 h-16 bg-append-orange/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-[3]" />
-                <div className="text-5xl mb-4 transform transition-transform group-hover:scale-110">{CATEGORY_ICONS[cat]}</div>
-                <span className="text-[11px] font-black text-center text-append-navy uppercase tracking-widest leading-tight">{cat}</span>
-              </button>
-            ))}
+            {Object.keys(CATEGORY_ICONS).map((cat) => {
+  // Logic: Calculate missing sub-categories for this category
+  const missingCount = (() => {
+    if (cat === "General Info") return 0;
+
+    // Get all items in this category
+    const catItems = template?.items?.filter(i => i.category === cat) || [];
+    
+    // Get unique list of sub-category names (the "Required" list)
+    const uniqueSubCats = [...new Set(catItems.map(i => i.sub_category))];
+    
+    // Count how many of those names have NO items that pass 'hasEntry'
+    return uniqueSubCats.filter(subName => {
+      const entriesForSub = catItems.filter(i => i.sub_category === subName);
+      return !entriesForSub.some(item => hasEntry(item));
+    }).length;
+  })();
+
+  return (
+    <button 
+      key={cat} 
+      onClick={() => { 
+        if (cat === "General Info") { setView('general_info'); } 
+        else { setActiveCategory(cat); setView('list'); } 
+      }} 
+      className="group relative flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-95 overflow-hidden"
+    >
+      {/* Dynamic Status Badge */}
+      {cat !== "General Info" && (
+        <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter shadow-sm transition-all border ${
+          missingCount === 0 
+            ? 'bg-green-500 text-white border-green-600' 
+            : 'bg-red-50 text-red-600 border-red-100'
+        }`}>
+          {missingCount === 0 ? '✓ Complete' : `${missingCount} Missing Entry`}
+        </div>
+      )}
+
+      <div className="absolute top-0 left-0 w-16 h-16 bg-append-orange/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-[3]" />
+      <div className="text-5xl mb-4 transform transition-transform group-hover:scale-110">{CATEGORY_ICONS[cat]}</div>
+      <span className="text-[11px] font-black text-center text-append-navy uppercase tracking-widest leading-tight">{cat}</span>
+    </button>
+  );
+})}
           </div>
         ) : (
           <div className="animate-in slide-in-from-right duration-300 text-append-navy">
@@ -518,11 +559,8 @@ const handleSave = async (shouldAddAnother = false) => {
             <h2 className="text-2xl font-black mb-6 italic uppercase">{activeCategory}</h2>
             <div className="space-y-3">
               {filteredItems.map((item) => {
-  // Only highlight green if it has a specific defect status OR a note
-const isDone = item.status && 
-               item.status !== 'NI' && 
-               item.status !== 'Not Inspected' && 
-               item.status !== '';
+  // Replace the old isDone line with this:
+const isDone = hasEntry(item);
   return (
     <button 
       key={item.id} 
