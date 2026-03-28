@@ -67,6 +67,9 @@ function App() {
   const [newInspectData, setNewInspectData] = useState({ address: '', client: '' });
   const [errorMsg, setErrorMsg] = useState(null); // Replace alert() with this
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+
   useEffect(() => { 
     if (isAuthenticated) {
       getMyInspections().then(setInspections); 
@@ -114,19 +117,26 @@ function App() {
   setStatus(cleanStatus); 
   setView('form');
 };
-  const handleDeleteItem = async (e, itemId) => {
-  e.stopPropagation(); // CRITICAL: Stops the form from opening
+  const handleDeleteItem = (e, itemId) => {
+  e.stopPropagation(); // Prevents opening the edit form
+  setItemToDelete(itemId);
+  setIsDeleteModalOpen(true);
+};
+
+// Create a new function for the actual deletion
+const confirmDelete = async () => {
+  if (!itemToDelete) return;
   
-  if (window.confirm("Are you sure you want to delete this specific entry?")) {
-    try {
-      await deleteItem(itemId);
-      // Remove the item from your current local template state
-      const updatedItems = template.items.filter(it => it.id !== itemId);
-      setTemplate({ ...template, items: updatedItems });
-      setErrorMsg("Entry Removed"); 
-    } catch (err) {
-      setErrorMsg("Delete Failed - Server Error");
-    }
+  try {
+    await deleteItem(itemToDelete);
+    const updatedItems = template.items.filter(it => it.id !== itemToDelete);
+    setTemplate({ ...template, items: updatedItems });
+    setErrorMsg("Entry Removed Successfully");
+  } catch (err) {
+    setErrorMsg("Delete Failed - Server Error");
+  } finally {
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
   }
 };
 
@@ -587,13 +597,13 @@ const hasEntry = (item) => {
             2. Removed 'opacity-0' so it's always visible on mobile/touch
         */}
         {isDone && (
-          <button 
-            onClick={(e) => handleDeleteItem(e, item.id)}
-            className="p-3 text-slate-400 hover:text-red-500 transition-colors active:scale-90"
-          >
-            <Trash2 size={20} />
-          </button>
-        )}
+  <button 
+    onClick={(e) => handleDeleteItem(e, item.id)} // This triggers the staging
+    className="p-3 text-slate-400 hover:text-red-500 transition-colors active:scale-90"
+  >
+    <Trash2 size={20} />
+  </button>
+)}
         
         <span className={isDone ? 'text-green-500 font-black' : 'text-slate-300'}>
           {isDone ? '✓' : '→'}
@@ -606,6 +616,25 @@ const hasEntry = (item) => {
           </div>
         )}
       </div>
+
+    <Modal 
+  isOpen={isDeleteModalOpen} 
+  title="Delete Entry?" 
+  onClose={() => setIsDeleteModalOpen(false)} 
+  onConfirm={confirmDelete}
+  confirmText="Delete Now"
+  isDelete={true} // This makes the button red in your existing component
+>
+  <div className="text-center py-2">
+    <p className="text-slate-500 font-bold">
+      Are you sure you want to remove this finding? 
+    </p>
+    <p className="text-[10px] text-red-400 uppercase mt-2 font-black tracking-widest">
+      This action cannot be undone.
+    </p>
+  </div>
+</Modal>
+
       {/* Minimal Modern Error Toast */}
 {/* Update this section at the bottom of App.jsx */}
 {errorMsg && (
