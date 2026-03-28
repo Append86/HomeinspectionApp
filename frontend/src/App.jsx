@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getMyInspections, updateItem, updateInspection, createInspectionFromTemplate, downloadInspectionReport, createItem, deleteItem, uploadPhoto} from './api';
+import { getMyInspections, updateItem, updateInspection, createInspectionFromTemplate, downloadInspectionReport, createItem, deleteItem, uploadPhoto, deletePhoto} from './api';
 import { ChevronLeft, Camera, CheckCircle, Home as HomeIcon, FileText, LogOut, Trash2 } from 'lucide-react';
 import Login from './Login';
 
@@ -191,11 +191,42 @@ const handleSave = async (shouldAddAnother = false) => {
     }
   };
 
+  const isDefect = (item) => {
+  const defectStatuses = ['MON', 'EOSL', 'MINOR', 'SIG', 'NI'];
+  return defectStatuses.includes(item.status);
+};
+
   // Helper to determine if a sub-category has a real entry
 const hasEntry = (item) => {
   return (item.note && item.note.trim() !== "") || 
          (item.location && item.location.trim() !== "") || 
          (item.status && item.status !== 'NI' && item.status !== 'Not Inspected');
+};
+
+const handlePhotoDelete = async (e, photoId) => {
+  e.stopPropagation(); // Prevent triggering other click events
+  if (!window.confirm("Delete this photo?")) return;
+
+  try {
+    await deletePhoto(photoId);
+    
+    // 1. Update the selectedItem state for the current form view
+    const updatedSelectedPhotos = selectedItem.photos.filter(p => p.id !== photoId);
+    setSelectedItem({ ...selectedItem, photos: updatedSelectedPhotos });
+
+    // 2. Update the main template state so the change persists
+    const updatedItems = template.items.map(it => {
+      if (it.id === selectedItem.id) {
+        return { ...it, photos: updatedSelectedPhotos };
+      }
+      return it;
+    });
+    setTemplate({ ...template, items: updatedItems });
+    
+    setErrorMsg("Photo Deleted");
+  } catch (err) {
+    setErrorMsg("Failed to delete photo");
+  }
 };
 
   // --- MODERN HEADER WITH LOGOUT ---
@@ -261,11 +292,28 @@ const hasEntry = (item) => {
 
           <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Recent Inspections</h2>
           {inspections.map(ins => (
-            <button key={ins.id} onClick={() => { setTemplate(ins); setView('grid'); }} className="w-full bg-white p-6 rounded-[2rem] border-b-4 border-slate-200 shadow-sm text-left active:translate-y-1 transition-all">
-              <p className="font-black text-append-navy uppercase italic">{ins.property_address}</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{ins.client_name} • {ins.inspection_status}</p>
-            </button>
-          ))}
+            <div key={ins.id} className="w-full bg-white p-6 rounded-[2rem] border-b-4 border-slate-200 shadow-sm text-left transition-all">
+    
+    {/* Clickable Area 1: Top part opens the Grid as usual */}
+    <div 
+      onClick={() => { setTemplate(ins); setView('grid'); }} 
+      className="cursor-pointer active:opacity-70"
+    >
+      <p className="font-black text-append-navy uppercase italic">{ins.property_address}</p>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+        {ins.client_name} • {ins.inspection_status}
+      </p>
+    </div>
+    
+    {/* NEW: Clickable Area 2: Bottom button opens the Summary */}
+    <button 
+      onClick={(e) => { e.stopPropagation(); setTemplate(ins); setView('summary'); }}
+      className="w-full py-3 bg-slate-50 rounded-xl text-[10px] font-black uppercase tracking-widest text-append-navy hover:bg-append-orange/10 active:scale-95 transition-all flex items-center justify-center gap-2"
+    >
+      📋 View Defect Summary
+    </button>
+  </div>
+))}
         </div>
 
         {/* NEW MODAL: This replaces the browser prompts */}
@@ -448,6 +496,64 @@ const hasEntry = (item) => {
     );
   }
 
+  if (view === 'summary') {
+  const defects = template?.items?.filter(item => isDefect(item)) || [];
+
+  return (
+    <div className="min-h-screen bg-slate-50 pb-12 text-append-navy">
+      <Header />
+      <div className="px-4 max-w-lg mx-auto">
+        <button onClick={() => setView('dashboard')} className="text-append-navy flex items-center mb-6 font-black text-xs tracking-widest uppercase">
+          <ChevronLeft size={18} /> Back to Dashboard
+        </button>
+
+        <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200 mb-6">
+          <h2 className="text-2xl font-black italic uppercase mb-2">Defect Summary</h2>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            {defects.length} Issues Identified at {template?.property_address}
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {defects.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-[2rem] border-2 border-dashed border-slate-200">
+              <p className="font-bold text-slate-400 uppercase text-xs tracking-widest">No Defects Found</p>
+            </div>
+          ) : (
+            defects.map((item) => (
+              <div key={item.id} className="bg-white p-6 rounded-[2rem] border-l-8 border-append-orange shadow-sm">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[10px] font-black text-append-orange uppercase tracking-widest">
+                    {item.category}
+                  </span>
+                  <span className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border border-red-100">
+                    {STATUS_OPTIONS.find(o => o.key === item.status)?.label}
+                  </span>
+                </div>
+                <h4 className="font-black text-append-navy uppercase italic text-sm mb-1">
+                  {item.sub_category} {item.location && `(${item.location})`}
+                </h4>
+                <p className="text-slate-600 text-xs font-medium leading-relaxed italic">
+                  "{item.note || 'No specific notes provided.'}"
+                </p>
+                
+                {/* Thumbnail Previews */}
+                {item.photos?.length > 0 && (
+                  <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+                    {item.photos.map(p => (
+                      <img key={p.id} src={p.image} className="w-16 h-16 rounded-xl object-cover border border-slate-100" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
   if (view === 'form' && selectedItem) {
     return (
       <div className="min-h-screen bg-slate-50 pb-12 text-append-navy">
@@ -516,15 +622,22 @@ const hasEntry = (item) => {
   
   <div className="grid grid-cols-4 gap-2">
     {/* Show existing uploaded photos */}
-    {selectedItem.photos?.map((photo, index) => (
-      <div key={index} className="aspect-square rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
-        <img 
-          src={photo.image} 
-          alt="Finding" 
-          className="w-full h-full object-cover"
-        />
-      </div>
-    ))}
+    {selectedItem.photos?.map((photo) => (
+    <div key={photo.id} className="relative aspect-square rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm group">
+      <img 
+        src={photo.image} 
+        alt="Finding" 
+        className="w-full h-full object-cover"
+      />
+      {/* Delete Button Overlay */}
+      <button
+        onClick={(e) => handlePhotoDelete(e, photo.id)}
+        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full shadow-lg transition-transform active:scale-90"
+      >
+        <Trash2 size={12} />
+      </button>
+    </div>
+  ))}
 
     {/* The "Add Photo" Button */}
     <label className="aspect-square bg-slate-50 rounded-2xl flex flex-col items-center justify-center text-append-orange border-2 border-dashed border-slate-200 cursor-pointer active:scale-95 transition-all">

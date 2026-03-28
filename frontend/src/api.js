@@ -83,3 +83,7 @@ export const uploadPhoto = async (itemId, file) => {
   });
   return response.data;
 };
+
+export const deletePhoto = async (photoId) => {
+  return await api.delete(`/api/photos/${photoId}/`);
+};
