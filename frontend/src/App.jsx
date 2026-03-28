@@ -106,7 +106,7 @@ function App() {
 
   const handleSelectItem = (item) => {
   setSelectedItem(item);
-  setItemName(item.item_name || item.sub_category || '');
+  setItemName(item.item_name || '');
   setLocation(item.location || '');
   setNotes(item.note || '');
   // FORCE INITIAL KEY: prevents 'Not Inspected' from entering the state
@@ -419,9 +419,14 @@ const handleSave = async (shouldAddAnother = false) => {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Identify Item</label>
-                <input value={itemName} onChange={e => setItemName(e.target.value)} placeholder="e.g. Toilet" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-append-navy outline-none" />
-              </div>
+  <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Identify Item</label>
+  <input 
+    value={itemName} 
+    onChange={e => setItemName(e.target.value)} 
+    placeholder="e.g. North Wall, Main Toilet, etc." // Descriptive example text
+    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-append-navy outline-none" 
+  />
+</div>
               <div className="space-y-1">
                 <label className="text-[9px] font-black text-slate-600 uppercase ml-1">Location</label>
                 <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Master Bath" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-append-navy outline-none" />
