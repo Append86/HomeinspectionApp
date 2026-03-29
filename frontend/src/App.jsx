@@ -232,12 +232,15 @@ const handlePhotoDelete = async (e, photoId) => {
   // --- MODERN HEADER WITH LOGOUT ---
   const Header = () => (
     <header className="bg-white border-b border-slate-100 p-6 shadow-sm mb-6 flex flex-col items-center relative">
-      <div className="flex items-center gap-2 mb-1">
-        <HomeIcon className="text-append-orange" size={24} />
-        <h1 className="text-append-navy text-2xl font-black tracking-tighter uppercase italic">
-          Append <span className="text-append-orange">One</span>
-        </h1>
-      </div>
+      <button 
+  onClick={() => setView('dashboard')}
+  className="flex items-center gap-2 mb-1 active:scale-95 transition-all"
+>
+  <HomeIcon className="text-append-orange" size={24} />
+  <h1 className="text-append-navy text-2xl font-black tracking-tighter uppercase italic">
+    Append <span className="text-append-orange">One</span>
+  </h1>
+</button>
       <p className="text-slate-400 text-[10px] font-black tracking-[0.3em] uppercase opacity-70">
         Field Inspection Tool
       </p>
@@ -282,6 +285,24 @@ const handlePhotoDelete = async (e, photoId) => {
       <div className="min-h-screen bg-slate-50 p-6">
         <Header />
         <div className="max-w-lg mx-auto space-y-4 text-append-navy">
+
+          {/* NEW: Profile Settings Quick Link */}
+        <button 
+          onClick={() => setView('profile')}
+          className="w-full bg-white border border-slate-200 p-4 rounded-2xl flex items-center justify-between group active:scale-95 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-append-orange/10 rounded-full flex items-center justify-center text-append-orange">
+              <FileText size={20} />
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inspector Profile</p>
+              <p className="text-xs font-bold text-append-navy">Manage Branding & License</p>
+            </div>
+          </div>
+          <ChevronLeft size={18} className="rotate-180 text-slate-300 group-hover:text-append-orange" />
+        </button>
+
           {/* UPDATED BUTTON: No more prompt() here */}
           <button 
             onClick={() => setIsModalOpen(true)}
@@ -496,6 +517,131 @@ const handlePhotoDelete = async (e, photoId) => {
     );
   }
 
+  if (view === 'profile') {
+  return (
+    <div className="min-h-screen bg-slate-50 pb-12 text-append-navy">
+      <Header />
+      <div className="px-4 max-w-lg mx-auto">
+        <button 
+          onClick={() => setView('dashboard')} 
+          className="text-append-navy flex items-center mb-6 font-black text-xs tracking-widest uppercase"
+        >
+          <ChevronLeft size={18} /> Back to Dashboard
+        </button>
+
+        <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200 mb-6">
+          <h2 className="text-2xl font-black italic uppercase mb-2">Inspector Profile</h2>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            Manage your professional branding & credentials
+          </p>
+        </div>
+
+        <div className="space-y-6 bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+          
+          {/* 1. Logo Upload Section */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Company Logo</label>
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
+                {template?.company_logo ? (
+                  <img src={template.company_logo} alt="Logo" className="w-full h-full object-contain" />
+                ) : (
+                  <Camera size={24} className="text-slate-300" />
+                )}
+              </div>
+              <label className="bg-append-navy text-white px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest cursor-pointer active:scale-95 transition-all">
+                Upload New Logo
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => {/* Add handleLogoUpload here */}} />
+              </label>
+            </div>
+          </div>
+
+          <hr className="border-slate-100" />
+
+          {/* 2. Professional Details */}
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
+              <input 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy outline-none focus:border-append-orange transition-all"
+                value={template?.inspector_name || ''} 
+                onChange={(e) => setTemplate({...template, inspector_name: e.target.value})}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">License #</label>
+                <input 
+                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy outline-none"
+                  value={template?.inspector_license_number || ''} 
+                  onChange={(e) => setTemplate({...template, inspector_license_number: e.target.value})}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">License Expiry</label>
+                <input 
+                  type="date"
+                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy outline-none"
+                  value={template?.license_expiration_date || ''} 
+                  onChange={(e) => setTemplate({...template, license_expiration_date: e.target.value})}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Company Details */}
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Company Name</label>
+              <input 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy outline-none"
+                value={template?.inspection_company || ''} 
+                onChange={(e) => setTemplate({...template, inspection_company: e.target.value})}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Company Address</label>
+              <input 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy outline-none"
+                value={template?.inspection_company_address || ''} 
+                onChange={(e) => setTemplate({...template, inspection_company_address: e.target.value})}
+              />
+            </div>
+            {/* Add this inside the Company Details section of your Profile View */}
+<div className="grid grid-cols-2 gap-3">
+  <div className="space-y-1">
+    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Company Phone</label>
+    <input 
+      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy outline-none"
+      value={template?.phone_number || ''} 
+      onChange={(e) => setTemplate({...template, phone_number: e.target.value})}
+    />
+  </div>
+  <div className="space-y-1">
+    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Company Email</label>
+    <input 
+      type="email"
+      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-append-navy outline-none"
+      value={template?.company_email || ''} 
+      onChange={(e) => setTemplate({...template, company_email: e.target.value})}
+    />
+  </div>
+</div>
+          </div>
+
+          <button 
+            onClick={handleGeneralSave} 
+            className="w-full bg-append-orange text-append-navy py-5 rounded-full font-black text-lg shadow-xl shadow-orange-100 active:scale-95 transition-all mt-4"
+          >
+            SAVE PROFILE SETTINGS
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
   if (view === 'summary') {
   const defects = template?.items?.filter(item => isDefect(item)) || [];
 
@@ -683,7 +829,32 @@ const handlePhotoDelete = async (e, photoId) => {
     <div className="min-h-screen bg-slate-50 pb-12 text-append-navy">
       <Header />
       <div className="px-4 max-w-lg mx-auto">
+
         {view === 'grid' ? (
+
+          <div className="animate-in fade-in duration-500">
+    {/* Navigation & Address Header */}
+    <div className="px-6 mb-2 flex flex-col items-start">
+      <button 
+        onClick={() => setView('dashboard')}
+        className="flex items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-append-orange transition-colors mb-2"
+      >
+        <ChevronLeft size={12} /> Back to All Inspections
+      </button>
+      
+      {/* THE DYNAMIC ADDRESS LABEL */}
+      <div className="flex items-baseline gap-2">
+        <span className="text-append-orange text-xs">📍</span>
+        <h2 className="text-xl font-black italic uppercase text-append-navy tracking-tight">
+          {template?.property_address || "Unnamed Inspection"}
+        </h2>
+      </div>
+      
+      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-5 mt-1">
+        Currently Inspecting • {template?.client_name}
+      </p>
+    </div>
+          
           <div className="grid grid-cols-2 gap-4 p-4">
             {Object.keys(CATEGORY_ICONS).map((cat) => {
   // Logic: Calculate missing sub-categories for this category
@@ -729,6 +900,7 @@ const handlePhotoDelete = async (e, photoId) => {
     </button>
   );
 })}
+          </div>
           </div>
         ) : (
           <div className="animate-in slide-in-from-right duration-300 text-append-navy">
