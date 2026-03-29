@@ -5,6 +5,9 @@ from .models import Inspection, InspectionItem, Photo
 from .serializers import InspectionSerializer, InspectionItemSerializer, PhotoSerializer
 from .utils import render_to_pdf
 from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from collections import defaultdict
 
 class InspectionViewSet(viewsets.ModelViewSet):
     serializer_class = InspectionSerializer
@@ -50,23 +53,49 @@ class InspectionViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'])
     def download_report(self, request, pk=None):
+    
         inspection = self.get_object()
-        user_profile = request.user.profile # Get inspector's logo and license
         
+        # 1. Fetch all items
+        items = inspection.items.all().order_by('category')
+
+        # --- NEW CODE START ---
+        # 2. FILTERING: Create a list of "Actionable" items for the Executive Summary
+        # This looks at the status of each item and grabs everything except "No Defects" or "Not Inspected"
+        summary_items = [
+            item for item in items 
+            if item.status not in ['NI', 'NDO', 'NA', 'YES', 'NO']
+        ]
+        # --- NEW CODE END ---
+
+        # 3. GROUPING: Organizes items by category for the main findings section
+        report_data = defaultdict(list)
+        for item in items:
+            report_data[item.category].append(item)
+
+        # 4. CONTEXT: Now passing 'summary_items' so the template can print that table
         context = {
             'inspection': inspection,
-            'profile': user_profile,
-            'items': inspection.items.all().order_by('category'),
+            'report_data': dict(report_data),
+            'summary_items': summary_items, # <--- Add this line
         }
-        
-        pdf = render_to_pdf('report_template.html', context)
-        
-        if pdf:
-            response = HttpResponse(pdf, content_type='application/pdf')
+
+        try:
+            # 5. WEASYPRINT RENDERING
+            html_string = render_to_string('report_template.html', context)
+            
+            html = HTML(string=html_string, base_url=request.build_absolute_uri())
+            pdf_file = html.write_pdf()
+
+            response = HttpResponse(pdf_file, content_type='application/pdf')
             filename = f"Report_{inspection.property_address.replace(' ', '_')}.pdf"
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
             return response
-        return Response({"error": "Failed to generate PDF"}, status=400)
+
+        except Exception as e:
+            print(f"PDF Error: {e}")
+            return Response({"error": "Failed to generate PDF"}, status=500)
+        
     
 
 

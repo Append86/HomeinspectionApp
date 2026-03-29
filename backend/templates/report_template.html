@@ -1,16 +1,229 @@
-<div style="display: flex; justify-content: space-between;">
-    <h1 style="color: orange;">INSPECTION REPORT</h1>
-    <p>Address: {{ inspection.property_address }}</p>
-</div>
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page {
+            size: Letter;
+            margin: 0.75in;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 9px;
+                text-transform: uppercase;
+                color: #94a3b8;
+            }
+        }
 
-{% for item in items %}
-    <div class="finding">
-        <h3>{{ item.sub_category }}</h3>
-        <p>{{ item.note }}</p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-            {% for photo in item.photos.all %}
-                <img src="{{ photo.image.url }}" style="width: 100%; padding: 5px;">
-            {% endfor %}
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #1e293b; /* Append Navy */
+            line-height: 1.5;
+        }
+
+        /* --- Category Header --- */
+        .category-section {
+            page-break-inside: avoid;
+            margin-top: 30px;
+        }
+
+        .category-header {
+            background-color: #f8fafc;
+            border-left: 5px solid #f97316; /* Append Orange */
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
+            font-style: italic;
+        }
+
+        /* --- Findings Styling --- */
+        .finding-item {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0; /* Subtle Horizontal Divider */
+        }
+
+        .finding-item:last-child {
+            border-bottom: none;
+        }
+
+        .finding-title {
+            font-weight: 800;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .photo-grid {
+            display: block;
+            margin-top: 15px;
+        }
+
+        .finding-photo {
+            width: 30%; /* Three photos per row */
+            margin-right: 2%;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* --- Cover Page Styling --- */
+.cover-page {
+    height: 9.5in; /* Standard Letter Height minus margins */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.cover-logo {
+    max-height: 120px;
+    margin-bottom: 40px;
+}
+
+.cover-hero {
+    background-color: #1e293b; /* Append Navy */
+    padding: 80px 40px;
+    border-radius: 20px;
+    color: white;
+    margin: 40px 0;
+}
+
+.hero-address {
+    font-size: 32px;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+}
+
+.label {
+    font-size: 10px;
+    font-weight: 900;
+    color: #94a3b8;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+}
+
+.value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.footer-grid {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 60px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 40px;
+}
+
+.inspector-branding {
+    font-size: 11px;
+    color: #64748b;
+    border-top: 4px solid #f97316; /* Append Orange Line */
+    padding-top: 20px;
+}
+    </style>
+</head>
+<body>
+
+    <div class="cover-page">
+    <div class="cover-header">
+        {% if inspection.company_logo %}
+            <img src="{{ inspection.company_logo.url }}" class="cover-logo">
+        {% else %}
+            <h1 class="fallback-logo">{{ inspection.inspection_company }}</h1>
+        {% endif %}
+    </div>
+
+    <div class="cover-hero">
+        <div class="hero-image-placeholder">
+            <h2 class="hero-address">{{ inspection.property_address }}</h2>
         </div>
     </div>
-{% endfor %}
+
+    <div class="cover-footer">
+        <div class="footer-grid">
+            <div class="client-box">
+                <p class="label">PREPARED FOR</p>
+                <p class="value">{{ inspection.client_name }}</p>
+            </div>
+            <div class="date-box">
+                <p class="label">INSPECTION DATE</p>
+                <p class="value">{{ inspection.date_of_inspection }}</p>
+            </div>
+        </div>
+        
+        <div class="inspector-branding">
+            <p><strong>{{ inspection.inspector_name }}</strong> | License #{{ inspection.inspector_license_number }}</p>
+            <p>{{ inspection.company_email }} | {{ inspection.phone_number }}</p>
+        </div>
+    </div>
+</div>
+
+<div style="page-break-after: always;"></div>
+
+    <div class="header">
+    {% if inspection.company_logo %}
+        <img src="{{ inspection.company_logo.url }}" style="height: 80px;">
+    {% endif %}
+    <div class="company-info">
+        <h1>{{ inspection.inspection_company }}</h1>
+        <p>{{ inspection.inspector_name }} | License: {{ inspection.inspector_license_number }}</p>
+    </div>
+</div>
+
+    {% for category, items in report_data.items %}
+    <div class="category-section">
+        <div class="category-header">
+            <h2 class="category-title">{{ category }}</h2>
+        </div>
+
+        {% for item in items %}
+        <div class="finding-item">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="finding-title">
+                    {{ item.sub_category }} 
+                    <span style="color: #64748b; font-weight: 400; font-size: 12px;">
+                        {% if item.location %}({{ item.location }}){% endif %}
+                    </span>
+                </h3>
+                {% if item.status != 'NDO' %}
+                <span class="status-badge">{{ item.get_status_display }}</span>
+                {% endif %}
+            </div>
+
+            <p style="font-size: 12px; color: #475569; margin-top: 5px;">
+                {{ item.note }}
+            </p>
+
+            <div class="photo-grid">
+                {% for photo in item.photos.all %}
+                <img src="{{ photo.image.path }}" class="finding-photo">
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+</body>
+</html>
