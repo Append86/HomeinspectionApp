@@ -69,6 +69,18 @@ function App() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+
+
+useEffect(() => {
+  if (view === 'profile' && isAuthenticated) {
+    // If no inspection is active, we fetch your latest one to pull profile data
+    if (!template && inspections.length > 0) {
+      setTemplate(inspections[0]);
+    }
+  }
+}, [view, inspections, isAuthenticated, template]);
+
 
   useEffect(() => { 
     if (isAuthenticated) {
@@ -89,23 +101,61 @@ function App() {
     setTemplate(null);
   };
 
+  //upload logo function to be used in the profile view
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    
+    // Safety check: Is there actually a file?
+    if (!file) return;
+
+    // 1. Store the actual File object in our new state (defined below)
+    setLogoFile(file);
+
+    // 2. Create a temporary "Local URL" so the UI updates immediately
+    // This lets you see the logo before it even hits the server
+    const localPreview = URL.createObjectURL(file);
+    
+    setTemplate({ 
+      ...template, 
+      company_logo: localPreview 
+    });
+
+    setErrorMsg("Logo staged - Press SAVE to finalize");
+  };
+
   // Add this function to handle the Modal's confirmation
  const handleCreateRequest = async () => {
-    if (newInspectData.address && newInspectData.client) {
-      try {
-        const newReport = await createInspectionFromTemplate(newInspectData.address, newInspectData.client);
-        setTemplate(newReport);
-        setIsModalOpen(false); 
-        setView('grid');
-        setNewInspectData({ address: '', client: '' }); 
-        getMyInspections().then(setInspections);
-      } catch (err) {
-        setErrorMsg("Failed to create new inspection report"); // NEW
-      }
-    } else {
-      setErrorMsg("Property address and client name are required"); // NEW
+  if (newInspectData.address && newInspectData.client) {
+    try {
+      // 1. Create the new report from template
+      const newReport = await createInspectionFromTemplate(newInspectData.address, newInspectData.client);
+      
+      // 2. AUTO-FILL: Inject your saved profile into this specific new report
+      const brandedReport = {
+        ...newReport,
+        inspector_name: template?.inspector_name,
+        inspection_company: template?.inspection_company,
+        inspection_company_address: template?.inspection_company_address,
+        phone_number: template?.phone_number,
+        company_email: template?.company_email,
+        inspector_license_number: template?.inspector_license_number,
+        license_expiration_date: template?.license_expiration_date,
+        company_logo: template?.company_logo
+      };
+
+      // 3. Save the branded version immediately
+      await updateInspection(newReport.id, brandedReport);
+      
+      setTemplate(brandedReport);
+      setIsModalOpen(false); 
+      setView('grid');
+      setErrorMsg("New Branded Report Created!");
+      getMyInspections().then(setInspections);
+    } catch (err) {
+      setErrorMsg("Failed to create branded report");
     }
-  };
+  }
+};
 
   const handleSelectItem = (item) => {
   setSelectedItem(item);
@@ -182,12 +232,34 @@ const handleSave = async (shouldAddAnother = false) => {
 // Add this function back to resolve the ReferenceError
   const handleGeneralSave = async () => {
     try {
-      // Logic: Save the top-level inspection data (address, client, etc.)
-      await updateInspection(template.id, template);
-      setErrorMsg("General Info Updated Successfully");
-      setView('grid');
+      setErrorMsg("Saving Profile...");
+      const data = new FormData();
+      
+      // If we have a staged logo file, add it to the upload
+      if (logoFile) {
+        data.append('company_logo', logoFile);
+      }
+
+      // Add the rest of your profile fields
+      data.append('inspector_name', template.inspector_name || '');
+      data.append('inspection_company', template.inspection_company || '');
+      data.append('inspection_company_address', template.inspection_company_address || '');
+      data.append('phone_number', template.phone_number || '');
+      data.append('company_email', template.company_email || '');
+      data.append('inspector_license_number', template.inspector_license_number || '');
+      data.append('license_expiration_date', template.license_expiration_date || '');
+
+      // Send to the SMART updateInspection function we fixed in api.js
+      await updateInspection(template.id, data);
+      
+      setErrorMsg("Profile & Logo Saved!");
+      setLogoFile(null); // Clear the stage
+      setView('dashboard');
+      
+      // Refresh list to show new branding
+      getMyInspections().then(setInspections);
     } catch (err) { 
-      setErrorMsg("Update Failed - Server Error"); 
+      setErrorMsg("Save Failed - Check image size"); 
     }
   };
 
@@ -549,9 +621,15 @@ const handlePhotoDelete = async (e, photoId) => {
                   <Camera size={24} className="text-slate-300" />
                 )}
               </div>
-              <label className="bg-append-navy text-white px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest cursor-pointer active:scale-95 transition-all">
+              <label className="bg-append-navy text-black px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest cursor-pointer active:scale-95 transition-all">
                 Upload New Logo
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => {/* Add handleLogoUpload here */}} />
+                <input 
+    id="logo-upload-input" // Add this ID
+    type="file" 
+    accept="image/*" 
+    className="hidden" 
+    onChange={handleLogoUpload} 
+  />
               </label>
             </div>
           </div>

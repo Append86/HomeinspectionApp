@@ -5,11 +5,20 @@ from django.dispatch import receiver
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    company_name = models.CharField(max_length=200, blank=True)
-    company_logo = models.ImageField(upload_to='logos/', blank=True, null=True)
-    company_address = models.CharField(max_length=500, blank=True)
+    
+    # Professional Details
+    inspector_name = models.CharField(max_length=255, blank=True)
     inspector_license_number = models.CharField(max_length=100, blank=True)
     license_expiration_date = models.DateField(null=True, blank=True)
+    
+    # Company Details
+    company_name = models.CharField(max_length=200, blank=True)
+    company_address = models.CharField(max_length=500, blank=True)
+    company_phone = models.CharField(max_length=20, blank=True) # Added
+    company_email = models.EmailField(blank=True)             # Added
+    
+    # Branding
+    company_logo = models.ImageField(upload_to='logos/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
@@ -107,4 +116,5 @@ class Photo(models.Model):
     # NEW FIELD:
     caption = models.CharField(max_length=255, blank=True, null=True) 
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
 

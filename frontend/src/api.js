@@ -28,10 +28,20 @@ export const updateItem = async (itemId, data) => {
 };
 
 export const updateInspection = async (id, data) => {
-  const response = await axios.patch(`${API_URL}inspections/${id}/`, data, getAuthHeader());
+  const token = localStorage.getItem('access');
+  
+  // We use FormData for files, or JSON for regular text
+  const isFormData = data instanceof FormData;
+
+  const response = await axios.patch(`${API_URL}inspections/${id}/`, data, {
+    headers: { 
+      'Authorization': `Bearer ${token}`,
+      // If it's FormData, the browser handles the content-type automatically
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' })
+    }
+  });
   return response.data;
 };
-
 // Add this to your api.js
 export const downloadInspectionReport = async (inspectionId, propertyAddress) => {
   const token = localStorage.getItem('access');
@@ -74,12 +84,22 @@ export const deleteItem = async (itemId) => {
 };
 
 export const uploadPhoto = async (itemId, file) => {
+  const token = localStorage.getItem('access');
   const formData = new FormData();
-  formData.append('item', itemId);
+  
+  // If we have an itemId, attach it. 
+  // If not (like for a logo), the backend needs to handle it differently.
+  if (itemId) {
+    formData.append('item', itemId);
+  }
   formData.append('image', file);
 
-  const response = await api.post('/api/photos/', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+  // CHANGE: Use axios directly and add the Auth header
+  const response = await axios.post(`${API_URL}photos/`, formData, {
+    headers: { 
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${token}`
+    }
   });
   return response.data;
 };
