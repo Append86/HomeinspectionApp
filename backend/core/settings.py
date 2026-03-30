@@ -49,12 +49,12 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-nsi)4ra2op(0j=23vo!!nq(anxj($3fu%t!7%ffqtrp008h-jt'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default-insecure-key-for-dev')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -87,7 +87,12 @@ MIDDLEWARE = [
 ]
 
 # Add this at the bottom of the file
-CORS_ALLOW_ALL_ORIGINS = True
+
+# Read from .env, default to local development if not found
+CORS_ALLOWED_ORIGINS = os.getenv(
+    "CORS_ALLOWED_ORIGINS", 
+    "http://localhost:5173,http://127.0.0.1:5173"
+).split(",")
 
 ROOT_URLCONF = 'core.urls'
 
