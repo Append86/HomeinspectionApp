@@ -97,10 +97,10 @@ class InspectionItem(models.Model):
     sub_category = models.CharField(max_length=255)
     
     # Logic Choice
-    field_type = models.CharField(max_length=10, choices=FIELD_TYPE_CHOICES, default='FINDING')
+    field_type = models.CharField(max_length=20, choices=FIELD_TYPE_CHOICES, default='FINDING')
     
     # These are now optional depending on field_type
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True)
     answer = models.CharField(max_length=10, choices=ANSWER_CHOICES, blank=True, null=True)
     
     item_name = models.CharField(max_length=100, blank=True)

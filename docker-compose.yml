@@ -1,4 +1,15 @@
 services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=home_inspection_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_password # Change this to something secure
+    ports:
+      - "5432:5432"
+
   backend:
     build: ./backend
     volumes:
@@ -6,7 +17,15 @@ services:
     ports:
       - "8000:8000"
     command: python manage.py runserver 0.0.0.0:8000
-    # ... other backend settings ...
+    depends_on:
+      - db
+    environment:
+      # This tells Django to use the 'db' container instead of SQLite
+      - DATABASE_URL=postgres://postgres:postgres_password@db:5432/home_inspection_db
+      - SPACES_ACCESS_KEY=${SPACES_ACCESS_KEY}
+      - SPACES_SECRET_KEY=${SPACES_SECRET_KEY}
+      - SPACES_BUCKET_NAME=${SPACES_BUCKET_NAME}
+      - SPACES_ENDPOINT_URL=${SPACES_ENDPOINT_URL}
 
   frontend:
     build: ./frontend
@@ -17,3 +36,6 @@ services:
       - "5173:5173"
     environment:
       - VITE_API_URL=http://localhost:8000/api/
+
+volumes:
+  postgres_data:

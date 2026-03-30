@@ -14,8 +14,12 @@ class InspectionViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Users only see inspections they own
-        return Inspection.objects.filter(user=self.request.user)
+        # Users only see inspections they own AND we exclude the master template
+        return Inspection.objects.filter(
+            user=self.request.user
+        ).exclude(
+            property_address="TEMPLATE MASTER"
+        )
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
