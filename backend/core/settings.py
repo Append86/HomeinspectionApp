@@ -118,23 +118,11 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 
-# Updated Database Logic in settings.py
-import dj_database_url
-
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL', f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
     )
 }
-
-# DigitalOcean/Heroku Fix: ensure the URL starts with 'postgresql://' instead of 'postgres://'
-if DATABASES['default'] and 'ENGINE' in DATABASES['default']:
-    db_url = os.environ.get('DATABASE_URL')
-    if db_url and db_url.startswith("postgres://"):
-        DATABASES['default'] = dj_database_url.parse(
-            db_url.replace("postgres://", "postgresql://", 1),
-            conn_max_age=600
-        )
 
 
 # Password validation
