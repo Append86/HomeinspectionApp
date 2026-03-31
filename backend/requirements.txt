@@ -8,3 +8,5 @@ psycopg2-binary
 weasyprint
 boto3
 django-storages
+gunicorn
+whitenoise
