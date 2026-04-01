@@ -182,3 +182,13 @@ MEDIA_URL = '/media/'
 # The absolute filesystem path to the directory that will hold user-uploaded files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# 1. Trust the HTTPS connection from DigitalOcean's Load Balancer
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# 2. Ensure cookies are sent only over HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# 3. Allow cookies to work with your /api prefix
+SESSION_COOKIE_PATH = '/api/'
+CSRF_COOKIE_PATH = '/api/'
