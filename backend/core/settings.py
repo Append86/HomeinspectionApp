@@ -167,7 +167,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = os.environ.get('STATIC_URL', '/static/')
+
+
+STATIC_ROOT = BASE_DIR / 'staticfiles' # This is where files go during build
+
+# 3. STORAGE: Tells WhiteNoise to compress and cache files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # The URL prefix for media files
