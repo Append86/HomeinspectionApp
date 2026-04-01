@@ -175,6 +175,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles' # This is where files go during build
 # 3. STORAGE: Tells WhiteNoise to compress and cache files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+WHITENOISE_STATIC_PREFIX = '/static/'
+
 
 # The URL prefix for media files
 MEDIA_URL = '/media/'
