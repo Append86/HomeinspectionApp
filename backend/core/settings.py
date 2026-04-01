@@ -56,6 +56,13 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost:8080").split(",")
+
+# Tells Django that DigitalOcean is handling the HTTPS/SSL
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+FORCE_SCRIPT_NAME = '/api'
+
 
 # Application definition
 
@@ -168,3 +175,4 @@ MEDIA_URL = '/media/'
 
 # The absolute filesystem path to the directory that will hold user-uploaded files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
