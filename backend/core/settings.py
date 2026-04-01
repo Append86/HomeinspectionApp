@@ -81,9 +81,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,7 +91,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    
 ]
 
 # Add this at the bottom of the file
@@ -170,8 +169,7 @@ USE_TZ = True
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
 
-STATIC_ROOT = BASE_DIR / 'staticfiles' # This is where files go during build
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # 3. STORAGE: Tells WhiteNoise to compress and cache files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
