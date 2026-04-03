@@ -196,8 +196,8 @@ CSRF_COOKIE_SECURE = True
 
 # Only enforce the /api/ cookie path in production
 if os.getenv('DJANGO_DEBUG') == 'False':
-    SESSION_COOKIE_PATH = '/api/'
-    CSRF_COOKIE_PATH = '/api/'
+    SESSION_COOKIE_PATH = '/'
+    CSRF_COOKIE_PATH = '/'
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 else:
@@ -205,3 +205,6 @@ else:
     CSRF_COOKIE_PATH = '/'
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
+
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
