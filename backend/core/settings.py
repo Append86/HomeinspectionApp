@@ -61,7 +61,8 @@ CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS","http://localhost:8
 # Tells Django that DigitalOcean is handling the HTTPS/SSL
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO','https')
 
-FORCE_SCRIPT_NAME = '/api'
+if os.getenv('DJANGO_DEBUG') == 'False':
+    FORCE_SCRIPT_NAME = '/api'
 
 
 # Application definition
@@ -190,5 +191,17 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # 3. Allow cookies to work with your /api prefix
-SESSION_COOKIE_PATH = '/api/'
-CSRF_COOKIE_PATH = '/api/'
+#SESSION_COOKIE_PATH = '/api/'
+#CSRF_COOKIE_PATH = '/api/'
+
+# Only enforce the /api/ cookie path in production
+if os.getenv('DJANGO_DEBUG') == 'False':
+    SESSION_COOKIE_PATH = '/api/'
+    CSRF_COOKIE_PATH = '/api/'
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+else:
+    SESSION_COOKIE_PATH = '/'
+    CSRF_COOKIE_PATH = '/'
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
