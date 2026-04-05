@@ -71,6 +71,8 @@ function App() {
   const [itemToDelete, setItemToDelete] = useState(null);
   const [logoFile, setLogoFile] = useState(null);
 
+  const [isUploading, setIsUploading] = useState(false);
+
 
 useEffect(() => {
   if (view === 'profile' && isAuthenticated) {
@@ -329,27 +331,36 @@ const handlePhotoDelete = async (e, photoId) => {
   );
 
   const handlePhotoUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file || !selectedItem?.id) return;
+    const file = e.target.files[0];
+    if (!file || !selectedItem) return;
 
-  try {
-    setErrorMsg("Uploading Photo...");
-    const newPhoto = await uploadPhoto(selectedItem.id, file);
-    
-    // Update local state so the photo appears immediately
-    const updatedItems = template.items.map(it => {
-      if (it.id === selectedItem.id) {
-        return { ...it, photos: [...(it.photos || []), newPhoto] };
-      }
-      return it;
-    });
-    
-    setTemplate({ ...template, items: updatedItems });
-    setSelectedItem({ ...selectedItem, photos: [...(selectedItem.photos || []), newPhoto] });
-    setErrorMsg("Photo Saved");
-  } catch (err) {
-    setErrorMsg("Photo Upload Failed");
-  }
+    // Start the loading state
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('item', selectedItem.id);
+
+    try {
+        await api.post('/api/photos/', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        
+        // Success! Refresh the data to show the new photo
+        const response = await api.get(`/api/inspections/${currentInspection.id}/`);
+        setCurrentInspection(response.data);
+        
+        // Find and update the selected item so the UI refreshes
+        const updatedItem = response.data.items.find(i => i.id === selectedItem.id);
+        setSelectedItem(updatedItem);
+        
+    } catch (err) {
+        console.error("Upload error:", err);
+        alert("Photo failed to upload. Please check your connection.");
+    } finally {
+        // Always stop the loading state
+        setIsUploading(false);
+    }
 };
 
   if (view === 'dashboard') {
@@ -864,17 +875,31 @@ const handlePhotoDelete = async (e, photoId) => {
   ))}
 
     {/* The "Add Photo" Button */}
-    <label className="aspect-square bg-slate-50 rounded-2xl flex flex-col items-center justify-center text-append-orange border-2 border-dashed border-slate-200 cursor-pointer active:scale-95 transition-all">
-      <Camera size={24} />
-      <span className="text-[8px] font-black mt-1 uppercase">Add</span>
-      <input 
-        type="file" 
-        accept="image/*" 
-        capture="environment" // This triggers the back camera on mobile
-        className="hidden" 
+    <label className={`flex items-center justify-center p-4 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+    isUploading ? 'bg-gray-100 border-gray-300' : 'border-orange-200 hover:bg-orange-50'
+}`}>
+    <input
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
         onChange={handlePhotoUpload}
-      />
-    </label>
+        disabled={isUploading}
+    />
+    <div className="flex flex-col items-center">
+        {isUploading ? (
+            <>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mb-2"></div>
+                <span className="text-sm text-gray-500 font-medium">Uploading to Spaces...</span>
+            </>
+        ) : (
+            <>
+                <Camera className="w-8 h-8 text-orange-500 mb-2" />
+                <span className="text-sm text-orange-600 font-medium">Add Photo</span>
+            </>
+        )}
+    </div>
+</label>
   </div>
 </div>
 

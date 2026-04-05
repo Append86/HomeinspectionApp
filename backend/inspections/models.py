@@ -5,6 +5,7 @@ from django.dispatch import receiver
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    company_logo = models.ImageField(upload_to='logos/', null=True, blank=True)
     
     # Professional Details
     inspector_name = models.CharField(max_length=255, blank=True)
@@ -52,6 +53,7 @@ class Inspection(models.Model):
     occupancy = models.CharField(max_length=100, blank=True)
     building_type = models.CharField(max_length=100, blank=True)
     year_built = models.IntegerField(null=True, blank=True)
+    report_file = models.FileField(upload_to='reports/', null=True, blank=True)
     
     STATUS_CHOICES = [
         ('active', 'In Progress'),

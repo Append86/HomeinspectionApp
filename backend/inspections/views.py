@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from collections import defaultdict
+from django.core.files.base import ContentFile
 
 class InspectionViewSet(viewsets.ModelViewSet):
     serializer_class = InspectionSerializer
@@ -57,48 +58,49 @@ class InspectionViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'])
     def download_report(self, request, pk=None):
-    
         inspection = self.get_object()
         
-        # 1. Fetch all items
+        # 1. Fetch all items and filter for summary
         items = inspection.items.all().order_by('category')
-
-        # --- NEW CODE START ---
-        # 2. FILTERING: Create a list of "Actionable" items for the Executive Summary
-        # This looks at the status of each item and grabs everything except "No Defects" or "Not Inspected"
         summary_items = [
             item for item in items 
             if item.status not in ['NI', 'NDO', 'NA', 'YES', 'NO']
         ]
-        # --- NEW CODE END ---
 
-        # 3. GROUPING: Organizes items by category for the main findings section
+        # 2. Group items by category
         report_data = defaultdict(list)
         for item in items:
             report_data[item.category].append(item)
 
-        # 4. CONTEXT: Now passing 'summary_items' so the template can print that table
         context = {
             'inspection': inspection,
             'report_data': dict(report_data),
-            'summary_items': summary_items, # <--- Add this line
+            'summary_items': summary_items,
         }
 
         try:
-            # 5. WEASYPRINT RENDERING
+            # 3. Generate the PDF content using WeasyPrint
             html_string = render_to_string('report_template.html', context)
-            
             html = HTML(string=html_string, base_url=request.build_absolute_uri())
-            pdf_file = html.write_pdf()
+            pdf_content = html.write_pdf() # This is the raw PDF data
 
-            response = HttpResponse(pdf_file, content_type='application/pdf')
-            filename = f"Report_{inspection.property_address.replace(' ', '_')}.pdf"
+            # --- PHASE C: SAVE TO DIGITALOCEAN SPACES ---
+            # We create a unique filename for the Space
+            filename = f"Report_{inspection.id}_{inspection.property_address.replace(' ', '_')}.pdf"
+            
+            # This line beams the file to your 'reports/' folder in Spaces
+            # It uses 'ContentFile' to turn the raw PDF data into a Django-friendly file
+            inspection.report_file.save(filename, ContentFile(pdf_content), save=True)
+            # --------------------------------------------
+
+            # 4. Return the response to the user for immediate download
+            response = HttpResponse(pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
             return response
 
         except Exception as e:
             print(f"PDF Error: {e}")
-            return Response({"error": "Failed to generate PDF"}, status=500)
+            return Response({"error": "Failed to generate or save PDF"}, status=500)
         
     
 
