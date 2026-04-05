@@ -10,3 +10,5 @@ boto3
 django-storages
 gunicorn
 whitenoise
+django-storages==1.14.2
+boto3==1.34.0

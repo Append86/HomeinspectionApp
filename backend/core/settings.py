@@ -43,7 +43,13 @@ AWS_S3_ENDPOINT_URL = os.getenv('SPACES_ENDPOINT_URL') # e.g. https://nyc3.digit
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 AWS_LOCATION = 'media'
 
+AWS_S3_REGION_NAME = 'nyc3' # Update this to match your region (e.g., nyc3, sfo3)
+AWS_DEFAULT_ACL = 'public-read' # Allows the phone to view the uploaded photos
+
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# The URL prefix for media files
+MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_LOCATION}/'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
