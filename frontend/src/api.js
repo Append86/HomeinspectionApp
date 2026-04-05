@@ -105,5 +105,9 @@ export const uploadPhoto = async (itemId, file) => {
 };
 
 export const deletePhoto = async (photoId) => {
-  return await api.delete(`/api/photos/${photoId}/`);
+  const token = localStorage.getItem('access');
+  const response = await axios.delete(`${API_URL}photos/${photoId}/`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
 };
