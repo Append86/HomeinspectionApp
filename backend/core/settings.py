@@ -36,6 +36,13 @@ SIMPLE_JWT = {
 
 # 2. DigitalOcean Spaces (S3 compatible) Settings
 # These should be in your .env file eventually
+# Simplified example of what your settings.py likely needs
+if os.getenv('USE_SPACES') == 'True':
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_S3_ENDPOINT_URL = os.getenv('SPACES_ENDPOINT_URL')
+    # ... other AWS/Spaces settings ...
+else:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 AWS_ACCESS_KEY_ID = os.getenv('SPACES_ACCESS_KEY')
 AWS_SECRET_ACCESS_KEY = os.getenv('SPACES_SECRET_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('SPACES_BUCKET_NAME')
