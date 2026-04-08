@@ -1,22 +1,41 @@
+// import axios from 'axios';
+
+// export const API_URL = import.meta.env.VITE_API_URL;
+
+// const getAuthHeader = () => ({
+//   headers: { Authorization: `Bearer ${localStorage.getItem('access')}` }
+// });
+
+
+// export const getMyInspections = async () => {
+//   try {
+//     // Added / before inspections
+//     const response = await axios.get(`${API_URL}/inspections/`, getAuthHeader());
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching inspections:", error);
+//     return [];
+//   }
+// };
+
 import axios from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL;
+// 1. Get the raw variable
+const rawUrl = import.meta.env.VITE_API_URL || '';
+
+// 2. This magic line removes any trailing slash from the variable 
+// so we can reliably add our own in the code.
+export const API_URL = rawUrl.replace(/\/$/, "");
 
 const getAuthHeader = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem('access')}` }
 });
 
-// --- UPDATED FUNCTIONS WITH LEADING SLASHES ---
-
+// 3. Now, in your functions, ALWAYS use a single leading slash:
 export const getMyInspections = async () => {
-  try {
-    // Added / before inspections
-    const response = await axios.get(`${API_URL}/inspections/`, getAuthHeader());
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching inspections:", error);
-    return [];
-  }
+  // This will ALWAYS result in /api/inspections/
+  const response = await axios.get(`${API_URL}/inspections/`, getAuthHeader());
+  return response.data;
 };
 
 export const createInspectionFromTemplate = async (address, client) => {

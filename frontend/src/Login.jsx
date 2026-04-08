@@ -9,7 +9,7 @@ function Login({ onLoginSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_URL}token/`, { username, password });
+      const res = await axios.post(`${API_URL}/token/`, { username, password });
       localStorage.setItem('access', res.data.access);
       localStorage.setItem('refresh', res.data.refresh);
       // Set the global axios header for future requests
