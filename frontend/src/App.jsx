@@ -330,35 +330,33 @@ const handlePhotoDelete = async (e, photoId) => {
     </header>
   );
 
-  const handlePhotoUpload = async (e) => {
+  // ✅ CORRECT: Use the 'uploadPhoto' function you imported at the top
+const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !selectedItem) return;
 
-    // Start the loading state
     setIsUploading(true);
 
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('item', selectedItem.id);
-
     try {
-        await api.post('/api/photos/', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        // Use the function directly from your api.js
+        const newPhotoData = await uploadPhoto(selectedItem.id, file);
         
-        // Success! Refresh the data to show the new photo
-        const response = await api.get(`/api/inspections/${currentInspection.id}/`);
-        setCurrentInspection(response.data);
-        
-        // Find and update the selected item so the UI refreshes
-        const updatedItem = response.data.items.find(i => i.id === selectedItem.id);
+        // Update your UI state with the new photo
+        const updatedPhotos = [...selectedItem.photos, newPhotoData];
+        const updatedItem = { ...selectedItem, photos: updatedPhotos };
         setSelectedItem(updatedItem);
-        
+
+        // Sync the main template state
+        const updatedItems = template.items.map(it => 
+            it.id === selectedItem.id ? updatedItem : it
+        );
+        setTemplate({ ...template, items: updatedItems });
+
+        setErrorMsg("Photo Uploaded Successfully!");
     } catch (err) {
         console.error("Upload error:", err);
-        alert("Photo failed to upload. Please check your connection.");
+        setErrorMsg("Photo failed to upload. Check connection.");
     } finally {
-        // Always stop the loading state
         setIsUploading(false);
     }
 };
