@@ -333,31 +333,35 @@ const handlePhotoDelete = async (e, photoId) => {
   // ✅ CORRECT: Use the 'uploadPhoto' function you imported at the top
 const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file || !selectedItem) return;
+    // CRITICAL: Ensure we have both the file AND the selectedItem with an ID
+    if (!file || !selectedItem || !selectedItem.id) {
+      setErrorMsg("Please save the item first before adding photos.");
+      return;
+    }
 
     setIsUploading(true);
 
     try {
-        // Use the function directly from your api.js
-        const newPhotoData = await uploadPhoto(selectedItem.id, file);
-        
-        // Update your UI state with the new photo
-        const updatedPhotos = [...selectedItem.photos, newPhotoData];
-        const updatedItem = { ...selectedItem, photos: updatedPhotos };
-        setSelectedItem(updatedItem);
+      // Use the function from api.js - it handles the FormData and headers correctly
+      const newPhotoData = await uploadPhoto(selectedItem.id, file);
+      
+      // Update the local state for immediate UI feedback
+      const updatedPhotos = [...(selectedItem.photos || []), newPhotoData];
+      const updatedItem = { ...selectedItem, photos: updatedPhotos };
+      setSelectedItem(updatedItem);
 
-        // Sync the main template state
-        const updatedItems = template.items.map(it => 
-            it.id === selectedItem.id ? updatedItem : it
-        );
-        setTemplate({ ...template, items: updatedItems });
+      // Update the main template state
+      const updatedItems = template.items.map(it => 
+        it.id === selectedItem.id ? updatedItem : it
+      );
+      setTemplate({ ...template, items: updatedItems });
 
-        setErrorMsg("Photo Uploaded Successfully!");
+      setErrorMsg("Photo Uploaded!");
     } catch (err) {
-        console.error("Upload error:", err);
-        setErrorMsg("Photo failed to upload. Check connection.");
+      console.error("Upload error:", err);
+      setErrorMsg("Upload failed. Check server logs.");
     } finally {
-        setIsUploading(false);
+      setIsUploading(false);
     }
 };
 
