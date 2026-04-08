@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import os
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -112,11 +113,31 @@ class InspectionItem(models.Model):
     def __str__(self):
         return f"{self.sub_category[:40]}..."
 
+
+# 1. ADD THIS HELPER FUNCTION ABOVE THE PHOTO CLASS
+def photo_upload_path(instance, filename):
+    """
+    Safely generates a path: inspections/Property_Address/filename
+    If the relationship isn't loaded yet, it uses a fallback folder.
+    """
+    try:
+        # Replace spaces with underscores for a clean URL/Folder name
+        folder = instance.item.inspection.property_address.replace(" ", "_")
+    except (AttributeError, Exception):
+        # Fallback if the relationship is missing during the initial save
+        folder = "general_uploads"
+    
+    return os.path.join("inspections", folder, filename)
+
+# 2. UPDATE YOUR PHOTO CLASS
 class Photo(models.Model):
     item = models.ForeignKey(InspectionItem, related_name='photos', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='inspections/%Y/%m/%d/')
-    # NEW FIELD:
+    # Change upload_to to use the function instead of the date string
+    image = models.ImageField(upload_to=photo_upload_path) 
     caption = models.CharField(max_length=255, blank=True, null=True) 
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Photo for {self.item.sub_category}"
 
 

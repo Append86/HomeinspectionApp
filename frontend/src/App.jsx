@@ -333,39 +333,37 @@ const handlePhotoDelete = async (e, photoId) => {
   // ✅ CORRECT: Use the 'uploadPhoto' function you imported at the top
 const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
-    
-    // 1. Validation: Ensure we have the file and a SAVED item ID
     if (!file || !selectedItem || !selectedItem.id) {
-      setErrorMsg("Please save the item entry first before adding photos.");
-      return;
+        setErrorMsg("Please save the entry before adding photos.");
+        return;
     }
 
     setIsUploading(true);
-
     try {
-      // 2. Use the correct imported function
-      const newPhotoData = await uploadPhoto(selectedItem.id, file);
-      
-      // 3. Update the UI state for the current item
-      const updatedPhotos = [...(selectedItem.photos || []), newPhotoData];
-      const updatedItem = { ...selectedItem, photos: updatedPhotos };
-      setSelectedItem(updatedItem);
+        // 1. Use the clean API call we built
+        const newPhotoData = await uploadPhoto(selectedItem.id, file);
+        
+        // 2. Update the UI state immediately using the returned data
+        const updatedItem = {
+            ...selectedItem,
+            photos: [...(selectedItem.photos || []), newPhotoData]
+        };
+        setSelectedItem(updatedItem);
 
-      // 4. Update the main 'template' state so the change is permanent
-      const updatedItems = template.items.map(it => 
-        it.id === selectedItem.id ? updatedItem : it
-      );
-      setTemplate({ ...template, items: updatedItems });
+        // 3. Sync with the main template list
+        setTemplate(prev => ({
+            ...prev,
+            items: prev.items.map(it => it.id === selectedItem.id ? updatedItem : it)
+        }));
 
-      setErrorMsg("Photo Uploaded Successfully!");
+        setErrorMsg("Photo Added!");
     } catch (err) {
-      console.error("Upload error:", err);
-      setErrorMsg("Photo failed to upload. Check connection.");
+        console.error("Upload error:", err);
+        setErrorMsg("Server error saving photo.");
     } finally {
-      setIsUploading(false);
+        setIsUploading(false);
     }
 };
-
   if (view === 'dashboard') {
     return (
       <div className="min-h-screen bg-slate-50 p-6">
