@@ -20,6 +20,13 @@
 
 import axios from 'axios';
 
+// --- ADD THESE TWO LINES HERE ---
+// Tells Axios to look for the 'csrftoken' cookie from Django
+axios.defaults.xsrfCookieName = 'csrftoken'; 
+// Tells Axios to send it back as the 'X-CSRFToken' header
+axios.defaults.xsrfHeaderName = 'X-CSRFToken'; 
+// ----------------------------------
+
 // 1. Get the raw variable
 const rawUrl = import.meta.env.VITE_API_URL || '';
 
