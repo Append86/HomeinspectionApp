@@ -333,33 +333,34 @@ const handlePhotoDelete = async (e, photoId) => {
   // ✅ CORRECT: Use the 'uploadPhoto' function you imported at the top
 const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
-    // CRITICAL: Ensure we have both the file AND the selectedItem with an ID
+    
+    // 1. Validation: Ensure we have the file and a SAVED item ID
     if (!file || !selectedItem || !selectedItem.id) {
-      setErrorMsg("Please save the item first before adding photos.");
+      setErrorMsg("Please save the item entry first before adding photos.");
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // Use the function from api.js - it handles the FormData and headers correctly
+      // 2. Use the correct imported function
       const newPhotoData = await uploadPhoto(selectedItem.id, file);
       
-      // Update the local state for immediate UI feedback
+      // 3. Update the UI state for the current item
       const updatedPhotos = [...(selectedItem.photos || []), newPhotoData];
       const updatedItem = { ...selectedItem, photos: updatedPhotos };
       setSelectedItem(updatedItem);
 
-      // Update the main template state
+      // 4. Update the main 'template' state so the change is permanent
       const updatedItems = template.items.map(it => 
         it.id === selectedItem.id ? updatedItem : it
       );
       setTemplate({ ...template, items: updatedItems });
 
-      setErrorMsg("Photo Uploaded!");
+      setErrorMsg("Photo Uploaded Successfully!");
     } catch (err) {
       console.error("Upload error:", err);
-      setErrorMsg("Upload failed. Check server logs.");
+      setErrorMsg("Photo failed to upload. Check connection.");
     } finally {
       setIsUploading(false);
     }
