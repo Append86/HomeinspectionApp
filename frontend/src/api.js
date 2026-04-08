@@ -112,18 +112,24 @@ export const deleteItem = async (itemId) => {
 };
 
 export const uploadPhoto = async (itemId, file) => {
+  // 1. Double check the token is actually there
   const token = localStorage.getItem('access');
+  if (!token) {
+    throw new Error("No access token found. Please log in again.");
+  }
+
   const formData = new FormData();
   if (itemId) {
     formData.append('item', itemId);
   }
   formData.append('image', file);
 
-  // Added / before photos
+  // 2. Be extremely explicit with the headers
   const response = await axios.post(`${API_URL}/photos/`, formData, {
     headers: { 
-      'Content-Type': 'multipart/form-data',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      // Do NOT manually set 'Content-Type': 'multipart/form-data' here. 
+      // Axios and the browser need to set the "boundary" automatically.
     }
   });
   return response.data;
