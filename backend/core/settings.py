@@ -37,26 +37,32 @@ SIMPLE_JWT = {
 # 2. DigitalOcean Spaces (S3 compatible) Settings
 # These should be in your .env file eventually
 # Simplified example of what your settings.py likely needs
-if os.getenv('USE_SPACES') == 'True':
+# settings.py
+
+USE_SPACES = os.getenv('USE_SPACES') == 'True'
+
+if USE_SPACES:
+    # Use DigitalOcean Spaces
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    AWS_S3_ENDPOINT_URL = os.getenv('SPACES_ENDPOINT_URL')
-    # ... other AWS/Spaces settings ...
+    AWS_ACCESS_KEY_ID = os.getenv('SPACES_ACCESS_KEY')
+    AWS_SECRET_ACCESS_KEY = os.getenv('SPACES_SECRET_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('SPACES_BUCKET_NAME')
+    AWS_S3_ENDPOINT_URL = os.getenv('SPACES_ENDPOINT_URL') # e.g. https://nyc3.digitaloceanspaces.com
+    
+    AWS_S3_REGION_NAME = 'nyc3' # Ensure this matches your endpoint region
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False 
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    
+    # This creates the URL for the browser to see the image
+    MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/media/'
 else:
+    # Use Local Storage for development
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-AWS_ACCESS_KEY_ID = os.getenv('SPACES_ACCESS_KEY')
-AWS_SECRET_ACCESS_KEY = os.getenv('SPACES_SECRET_KEY')
-AWS_STORAGE_BUCKET_NAME = os.getenv('SPACES_BUCKET_NAME')
-AWS_S3_ENDPOINT_URL = os.getenv('SPACES_ENDPOINT_URL') # e.g. https://nyc3.digitaloceanspaces.com
-AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-AWS_LOCATION = 'media'
+    MEDIA_URL = '/media/'
 
-AWS_S3_REGION_NAME = 'nyc3' # Update this to match your region (e.g., nyc3, sfo3)
-AWS_DEFAULT_ACL = 'public-read' # Allows the phone to view the uploaded photos
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-# The URL prefix for media files
-MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_LOCATION}/'
+# Path for local files (always keep this)
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/

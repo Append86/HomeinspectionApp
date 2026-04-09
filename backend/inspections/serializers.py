@@ -4,7 +4,7 @@ from .models import Inspection, InspectionItem, Photo
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
-        fields = ['id', 'image', 'caption']
+        fields = ['id', 'item', 'image', 'caption', 'uploaded_at']
 
 class InspectionItemSerializer(serializers.ModelSerializer):
     photos = PhotoSerializer(many=True, read_only=True)
