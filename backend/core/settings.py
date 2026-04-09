@@ -41,33 +41,35 @@ SIMPLE_JWT = {
 
 # settings.py
 
+# settings.py
+
 USE_SPACES = os.getenv('USE_SPACES') == 'True'
 
 if USE_SPACES:
-    # 1. Force the S3/Spaces Backend
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     
-    # 2. Connection Settings (Use the EXACT names you have in DO Dashboard)
+    # These must match your DO App Platform environment variable names
     AWS_ACCESS_KEY_ID = os.getenv('SPACES_ACCESS_KEY')
     AWS_SECRET_ACCESS_KEY = os.getenv('SPACES_SECRET_KEY')
     AWS_STORAGE_BUCKET_NAME = os.getenv('SPACES_BUCKET_NAME')
     AWS_S3_ENDPOINT_URL = os.getenv('SPACES_ENDPOINT_URL') # e.g., https://nyc3.digitaloceanspaces.com
+
+    # This is the "Magic Link" builder
+    # It strips 'https://' from the endpoint to create: bucketname.region.digitaloceanspaces.com
+    endpoint_domain = AWS_S3_ENDPOINT_URL.replace('https://', '')
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.{endpoint_domain}'
     
-    # 3. URL Settings
-    # This prevents the 404 by pointing the browser to the Space URL, not your app URL
-    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL.split('//')[1]}"
-    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+    # This forces Django to use the full Spaces URL for every image
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
     
-    # 4. Security & Permissions
-    AWS_DEFAULT_ACL = 'public-read' 
-    AWS_QUERYSTRING_AUTH = False  # Makes URLs "clean" (no long tokens at the end)
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False 
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 else:
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
