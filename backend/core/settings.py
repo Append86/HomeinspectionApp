@@ -57,10 +57,10 @@ if USE_SPACES:
     # This is the "Magic Link" builder
     # It strips 'https://' from the endpoint to create: bucketname.region.digitaloceanspaces.com
     endpoint_domain = AWS_S3_ENDPOINT_URL.replace('https://', '')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.{endpoint_domain}'
+    AWS_S3_CUSTOM_DOMAIN = None
     
     # This forces Django to use the full Spaces URL for every image
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+    MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/'
     
     AWS_DEFAULT_ACL = 'public-read'
     AWS_QUERYSTRING_AUTH = False 
