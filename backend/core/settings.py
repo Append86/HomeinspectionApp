@@ -39,29 +39,33 @@ SIMPLE_JWT = {
 # Simplified example of what your settings.py likely needs
 # settings.py
 
+# settings.py
+
 USE_SPACES = os.getenv('USE_SPACES') == 'True'
 
 if USE_SPACES:
-    # Use DigitalOcean Spaces
+    # 1. Force the S3/Spaces Backend
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    
+    # 2. Connection Settings (Use the EXACT names you have in DO Dashboard)
     AWS_ACCESS_KEY_ID = os.getenv('SPACES_ACCESS_KEY')
     AWS_SECRET_ACCESS_KEY = os.getenv('SPACES_SECRET_KEY')
     AWS_STORAGE_BUCKET_NAME = os.getenv('SPACES_BUCKET_NAME')
-    AWS_S3_ENDPOINT_URL = os.getenv('SPACES_ENDPOINT_URL') # e.g. https://nyc3.digitaloceanspaces.com
+    AWS_S3_ENDPOINT_URL = os.getenv('SPACES_ENDPOINT_URL') # e.g., https://nyc3.digitaloceanspaces.com
     
-    AWS_S3_REGION_NAME = 'nyc3' # Ensure this matches your endpoint region
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_QUERYSTRING_AUTH = False 
+    # 3. URL Settings
+    # This prevents the 404 by pointing the browser to the Space URL, not your app URL
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL.split('//')[1]}"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+    
+    # 4. Security & Permissions
+    AWS_DEFAULT_ACL = 'public-read' 
+    AWS_QUERYSTRING_AUTH = False  # Makes URLs "clean" (no long tokens at the end)
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-    
-    # This creates the URL for the browser to see the image
-    MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/media/'
 else:
-    # Use Local Storage for development
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_URL = '/media/'
 
-# Path for local files (always keep this)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Quick-start development settings - unsuitable for production
