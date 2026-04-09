@@ -860,11 +860,7 @@ const handlePhotoUpload = async (e) => {
     {/* Show existing uploaded photos */}
     {selectedItem.photos?.map((photo) => (
     <div key={photo.id} className="relative aspect-square rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm group">
-      <img 
-        src={photo.image} 
-        alt="Finding" 
-        className="w-full h-full object-cover"
-      />
+      <img src={photo.image_url || photo.image} alt="Finding" className="w-full h-full object-cover" />
       {/* Delete Button Overlay */}
       <button
         onClick={(e) => handlePhotoDelete(e, photo.id)}

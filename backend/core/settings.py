@@ -214,12 +214,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WHITENOISE_STATIC_PREFIX = '/static/'
 
 
-# The URL prefix for media files
-MEDIA_URL = '/media/'
-
-# The absolute filesystem path to the directory that will hold user-uploaded files
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # 1. Trust the HTTPS connection from DigitalOcean's Load Balancer
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
