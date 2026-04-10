@@ -217,7 +217,7 @@
 
             <div class="photo-grid">
                 {% for photo in item.photos.all %}
-                <img src="{{ photo.image.path }}" class="finding-photo">
+                <img src="{{ photo.image.url }}" class="finding-photo">
                 {% endfor %}
             </div>
         </div>
